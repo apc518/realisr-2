@@ -1,5 +1,5 @@
 # Realisr 2 🕰️
-Group-up reboot of Realisr as a clientside-only webapp with way more features
+Ground-up reboot of Realisr as a client-side-only webapp with way more features
 
 [Realisr 1](https://github.com/apc518/realisr.git) was written in Python and was not well optimized.
 
