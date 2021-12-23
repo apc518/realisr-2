@@ -2,13 +2,31 @@
 /* eslint-disable */
 /**
 */
-export function big_computation(): void;
+export class TimePlot {
+  free(): void;
 /**
-* @param {string} name
+* @param {number} x
+* @param {number} y
 */
-export function welcome(name: string): void;
+  add_point(x: number, y: number): void;
 /**
-* @param {number} num
+*/
+  calc_stats(): void;
+/**
 * @returns {number}
 */
-export function divide_by_two(num: number): number;
+  get_path_length(): number;
+/**
+* @returns {string}
+*/
+  my_to_string(): string;
+/**
+* @returns {TimePlot}
+*/
+  static new(): TimePlot;
+}
+/**
+*/
+export class WalkPoint {
+  free(): void;
+}

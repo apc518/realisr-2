@@ -17,89 +17,94 @@ function getUint8Memory0() {
 function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
+
+let cachegetInt32Memory0 = null;
+function getInt32Memory0() {
+    if (cachegetInt32Memory0 === null || cachegetInt32Memory0.buffer !== wasm.memory.buffer) {
+        cachegetInt32Memory0 = new Int32Array(wasm.memory.buffer);
+    }
+    return cachegetInt32Memory0;
+}
 /**
 */
-export function big_computation() {
-    wasm.big_computation();
-}
+export class TimePlot {
 
-let WASM_VECTOR_LEN = 0;
+    static __wrap(ptr) {
+        const obj = Object.create(TimePlot.prototype);
+        obj.ptr = ptr;
 
-const lTextEncoder = typeof TextEncoder === 'undefined' ? (0, module.require)('util').TextEncoder : TextEncoder;
+        return obj;
+    }
 
-let cachedTextEncoder = new lTextEncoder('utf-8');
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
 
-const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
-    ? function (arg, view) {
-    return cachedTextEncoder.encodeInto(arg, view);
-}
-    : function (arg, view) {
-    const buf = cachedTextEncoder.encode(arg);
-    view.set(buf);
-    return {
-        read: arg.length,
-        written: buf.length
-    };
-});
-
-function passStringToWasm0(arg, malloc, realloc) {
-
-    if (realloc === undefined) {
-        const buf = cachedTextEncoder.encode(arg);
-        const ptr = malloc(buf.length);
-        getUint8Memory0().subarray(ptr, ptr + buf.length).set(buf);
-        WASM_VECTOR_LEN = buf.length;
         return ptr;
     }
 
-    let len = arg.length;
-    let ptr = malloc(len);
-
-    const mem = getUint8Memory0();
-
-    let offset = 0;
-
-    for (; offset < len; offset++) {
-        const code = arg.charCodeAt(offset);
-        if (code > 0x7F) break;
-        mem[ptr + offset] = code;
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_timeplot_free(ptr);
     }
-
-    if (offset !== len) {
-        if (offset !== 0) {
-            arg = arg.slice(offset);
+    /**
+    * @param {number} x
+    * @param {number} y
+    */
+    add_point(x, y) {
+        wasm.timeplot_add_point(this.ptr, x, y);
+    }
+    /**
+    */
+    calc_stats() {
+        wasm.timeplot_calc_stats(this.ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    get_path_length() {
+        var ret = wasm.timeplot_get_path_length(this.ptr);
+        return ret;
+    }
+    /**
+    * @returns {string}
+    */
+    my_to_string() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.timeplot_my_to_string(retptr, this.ptr);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            wasm.__wbindgen_free(r0, r1);
         }
-        ptr = realloc(ptr, len, len = offset + arg.length * 3);
-        const view = getUint8Memory0().subarray(ptr + offset, ptr + len);
-        const ret = encodeString(arg, view);
+    }
+    /**
+    * @returns {TimePlot}
+    */
+    static new() {
+        var ret = wasm.timeplot_new();
+        return TimePlot.__wrap(ret);
+    }
+}
+/**
+*/
+export class WalkPoint {
 
-        offset += ret.written;
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        return ptr;
     }
 
-    WASM_VECTOR_LEN = offset;
-    return ptr;
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_walkpoint_free(ptr);
+    }
 }
-/**
-* @param {string} name
-*/
-export function welcome(name) {
-    var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len0 = WASM_VECTOR_LEN;
-    wasm.welcome(ptr0, len0);
-}
-
-/**
-* @param {number} num
-* @returns {number}
-*/
-export function divide_by_two(num) {
-    var ret = wasm.divide_by_two(num);
-    return ret;
-}
-
-export function __wbg_alert_8d43f723b291f1fc(arg0, arg1) {
-    alert(getStringFromWasm0(arg0, arg1));
-};
 
 export function __wbindgen_throw(arg0, arg1) {
     throw new Error(getStringFromWasm0(arg0, arg1));

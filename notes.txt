@@ -1,15 +1,15 @@
 Timeplot representation: list of (point, vector)
     this stores 2x the data technically necessary but may make it easier to compute output
 
-Iterate through vectors to gather important info:
+DONE - Iterate through vectors to gather important info:
     record max and min x values (to compute plot width)
     record how far along the path each vector is (this lets us know later where each segment comes from in the input audio)
     sum up total path length
 
 Illustration:
-    p5.js might work? probably not performant though
-    D3? might be a good time to learn D3...
-    Cytoscape: https://js.cytoscape.org
+    p5.js for a demo, but this is not performant so should be replaced eventually with...
+    D3? svg based, might be a good time to learn D3...
+    Cytoscape? canavas based, pretty well optimized it seems https://js.cytoscape.org
 
 
 
