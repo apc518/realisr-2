@@ -53,9 +53,9 @@ export default function FileDrop({ audioCtx, setAudioCtx, audioBuffers, setAudio
                     aCtx.decodeAudioData(res).then(decodedData => {
                         console.log(decodedData);
                 
-                        for(let ch = 0; ch < decodedData.numberOfChannels; ch++){
-                            decodedData.getChannelData(ch).reverse();
-                        }
+                        // for(let ch = 0; ch < decodedData.numberOfChannels; ch++){
+                        //     decodedData.getChannelData(ch).reverse();
+                        // }
                 
                         setAudioBuffers([...audioBuffers, decodedData])
                     });

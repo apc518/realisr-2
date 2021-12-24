@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
 
 import { TimePlot } from '../build/realisr_2';
+import { memory } from '../build/realisr_2_bg.wasm';
 
 import FileDrop from "./components/FileDrop.jsx";
 
@@ -99,12 +100,28 @@ export default function App({ wasm }){
                         else{
                             aCtx = audioCtx;
                         }
+
+                        for(let ch = 0; ch < ab.numberOfChannels; ch++){
+                            let channel = ab.getChannelData(ch);
+                            for(let i = 0; i < channel.length; i++){
+                                rustTimePlot.add_input_audio_frame(channel[i]);
+                            }
+                        }
+
+                        rustTimePlot.generate_out_audio();
+
+                        const rustBufferPtr = rustTimePlot.get_out_audio_buffer();
+                        const rustBuffer = new Float32Array(memory.buffer, rustBufferPtr, rustTimePlot.get_out_audio_buffer_length());
+
+                        const rustAudioBuffer = new AudioBuffer({ length: rustBuffer.length, numberOfChannels: 1, sampleRate: ab.sampleRate });
+                        rustAudioBuffer.copyToChannel(rustBuffer, 0);
+
+                        console.log(rustTimePlot.my_to_string());
                     
                         let source = aCtx.createBufferSource();
-                        source.buffer = ab;
+                        source.buffer = rustAudioBuffer;
                         source.connect(aCtx.destination);
                         setAudioBufferNodes([...audioBufferNodes, source]); // audioBufferNodes.push(source)
-                        source.playbackRate.value = 0.5;
                         source.start();
                     }}
                 >
