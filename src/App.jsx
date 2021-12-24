@@ -10,10 +10,8 @@ export const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 const timeplot = [
     { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: 3},
-    { x: 2, y: -1},
-    { x: 0, y: -2}
+    { x: 3, y: 4 },
+    { x: 8, y: 4}
 ]
 
 const transformCoords = (vec) => {
@@ -38,8 +36,6 @@ const sketch = p5 => {
     }
 }
 
-const rustTimePlot = TimePlot.new();
-
 export default function App({ wasm }){
     const [files, setFiles] = useState([]);
     const [audioCtx, setAudioCtx] = useState(null);
@@ -52,30 +48,19 @@ export default function App({ wasm }){
         <div
             style={{
                 height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
             }}
         >
-
-
             <div
                 style={{
-                    position: 'absolute',
-                    left: 10,
-                    top: 10,
                     fontSize: 20,
                     fontFamily: 'Trebuchet MS'
                 }}
             >
                 <button
                     onClick={() => {
-                        timeplot.map(p => rustTimePlot.add_point(p.x, p.y));
-                        rustTimePlot.calc_stats();
                         console.log(rustTimePlot.my_to_string());
-                        setPathLength(rustTimePlot.get_path_length());
                     }}
-                >Calculate path statistics</button>
+                >Log path statistics</button>
                 { pathLength ? <><br/>Path length: {pathLength}</> : <></>}
                 <ReactP5Wrapper sketch={sketch}/>
             </div>
@@ -101,6 +86,11 @@ export default function App({ wasm }){
                             aCtx = audioCtx;
                         }
 
+                        const rustTimePlot = TimePlot.new();
+
+                        // input our data into rust
+                        timeplot.map(p => rustTimePlot.add_point(p.x, p.y));
+
                         for(let ch = 0; ch < ab.numberOfChannels; ch++){
                             let channel = ab.getChannelData(ch);
                             for(let i = 0; i < channel.length; i++){
@@ -108,8 +98,12 @@ export default function App({ wasm }){
                             }
                         }
 
-                        rustTimePlot.generate_out_audio();
+                        console.time();
+                        // compute LSR
+                        rustTimePlot.compute_true_timeplot();
+                        console.timeEnd();
 
+                        // get output from Rust
                         const rustBufferPtr = rustTimePlot.get_out_audio_buffer();
                         const rustBuffer = new Float32Array(memory.buffer, rustBufferPtr, rustTimePlot.get_out_audio_buffer_length());
 
@@ -125,6 +119,7 @@ export default function App({ wasm }){
                         source.start();
                     }}
                 >
+
                     Play clip {i}
                 </button>
             ))}

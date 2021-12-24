@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 
 extern crate web_sys;
+extern crate console_error_panic_hook;
 
 #[wasm_bindgen]
 pub struct WalkPoint {
@@ -82,6 +83,74 @@ impl TimePlot {
             self.out_audio_buffer.len()
         )
     }
+    
+    fn linear_interp(&self, idx: f64) -> f32 {
+        if idx > (self.in_audio_buffer.len() - 1) as f64 {
+            web_sys::console::log_1(&"Index out of bounds".into());
+            return self.in_audio_buffer[self.in_audio_buffer.len() - 1];
+        }
+        let mut ceil_idx = idx.ceil() as usize;
+        let floor_idx = idx.floor() as usize;
+        let portion = idx - (floor_idx as f64);
+        if ceil_idx >= self.in_audio_buffer.len() {
+            ceil_idx = self.in_audio_buffer.len() - 1;
+        }
+        let diff = self.in_audio_buffer[ceil_idx] - self.in_audio_buffer[floor_idx];
+        self.in_audio_buffer[floor_idx] + (portion as f32) * diff
+    }
+    
+    pub fn compute_true_timeplot(&mut self) {
+        // compute stats
+        self.calc_stats();
+        
+        // compute length of output buffer
+        let output_buffer_length = (self.in_audio_buffer.len() as f64 * ((self.max_x - self.min_x) / self.path_length)).floor() as usize;
+        
+        // initialize output buffer as zeroes
+        for _i in 0..output_buffer_length {
+            self.out_audio_buffer.push(0.0);
+        }
+
+        web_sys::console::log_1(&format!("output_buffer_length: {}", output_buffer_length).into());
+        web_sys::console::log_1(&format!("self.out_audio_buffer.len(): {}", self.out_audio_buffer.len()).into());
+        
+        if self.points.len() < 2 { return }
+        
+        // go through each walkpoint starting at the second (index 1)
+        for i in 1..self.points.len() {
+            let mut thumb = self.in_audio_buffer.len() as f64 * self.points[i-1].path_position / self.path_length;
+            let end = (self.in_audio_buffer.len() as f64 * self.points[i].path_position / self.path_length).floor();
+            let increment = self.points[i].length_from_previous / (self.points[i].x - self.points[i-1].x);
+            let mut out_idx = (output_buffer_length as f64 * ((self.points[i-1].x - self.min_x) / (self.max_x - self.min_x))).floor() as usize;
+            web_sys::console::log_1(&format!("thumb: {}, end: {}, increment: {}, starting out_idx: {}", thumb, end, increment, out_idx).into());
+            while thumb < end && out_idx < self.out_audio_buffer.len() {
+                self.out_audio_buffer[out_idx] += self.linear_interp(thumb);
+                thumb += increment;
+                out_idx += 1; // TODO won't work in final product; we might need to go backwards!
+            }
+        }
+        // for i in 1..self.points.len() {
+        //     let thumb = self.in_audio_buffer.len() as f64 * self.points[i-1].path_position / self.path_length;
+        //     let increment = self.points[i].length_from_previous / (self.points[i].x - self.points[i-1].x);
+        //     let out_idx = (output_buffer_length as f64 * ((self.points[i-1].x - self.min_x) / (self.max_x - self.min_x))).floor() as usize;
+        //     let end_out_idx = (output_buffer_length as f64 * ((self.points[i].x - self.min_x) / (self.max_x - self.min_x))).floor() as usize;
+        //     for i in out_idx..end_out_idx {
+        //         self.out_audio_buffer[i] += self.linear_interp(i as f64 * increment + thumb);
+        //     }
+        // }
+        
+        // TODO normalize audio output again
+    }
+    
+    pub fn generate_out_audio(&mut self) {
+        for i in 0..self.in_audio_buffer.len() {
+            self.out_audio_buffer.push(self.in_audio_buffer[i]);
+        }
+    }
+    
+    pub fn add_input_audio_frame(&mut self, val: f32) {
+        self.in_audio_buffer.push(val);
+    }
 
     pub fn get_out_audio_buffer(&self) -> *const f32 {
         self.out_audio_buffer.as_ptr()
@@ -90,18 +159,10 @@ impl TimePlot {
     pub fn get_out_audio_buffer_length(&self) -> u32 {
         self.out_audio_buffer.len() as u32
     }
-
-    pub fn generate_out_audio(&mut self) {
-        for i in 0..self.in_audio_buffer.len() {
-            self.out_audio_buffer.push(self.in_audio_buffer[i]);
-        }
-    }
-
-    pub fn add_input_audio_frame(&mut self, val: f32) {
-        self.in_audio_buffer.push(val);
-    }
-
+    
     pub fn new() -> TimePlot{
+        console_error_panic_hook::set_once();
+
         TimePlot{
             points: vec![],
             path_length: 0.0,
