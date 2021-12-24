@@ -6,5 +6,5 @@ dist/bundle.*.js
 dist/index.html
 build/realisr_2_bg.js
 build/realisr_2_bg.wasm
-build/realisr_2_bg.d.ts
+build/realisr_2_bg.wasm.d.ts
 build/realisr_2.d.ts
