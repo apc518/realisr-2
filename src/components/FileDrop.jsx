@@ -34,10 +34,6 @@ export default function FileDrop({ audioCtx, setAudioCtx, audioBuffers, setAudio
 
                 setBgColor(inactiveColor);
 
-                // setFiles(e.dataTransfer.files);
-                
-                // console.log(files[0]);
-                
                 console.log(e.dataTransfer.files[0]);
 
                 let aCtx;
