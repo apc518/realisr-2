@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 import { AudioContext } from '../App.jsx';
 
-const inactiveColor = "#f0f";
-const activeColor = "#f88";
+const inactiveColor = "#d0d";
+const activeColor = "#d77";
 
 export default function FileDrop({ audioCtx, setAudioCtx, audioBuffers, setAudioBuffers }){
     const [bgColor, setBgColor] = useState(inactiveColor);
@@ -55,7 +55,12 @@ export default function FileDrop({ audioCtx, setAudioCtx, audioBuffers, setAudio
                 .catch(e => console.error(e));
             }}
         >
-            File drop
+            <div style={{
+                maxWidth: 150,
+                textAlign: 'center'
+            }}>
+                Drag and drop your audio file here!
+            </div>
         </div>
     )
 }
