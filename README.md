@@ -16,7 +16,3 @@ npm run build
 npm run dev
 ```
 
-## New Features (WIP)
-
-- Live Editor: a simple click-and-drag editor that enables manual creation of timeplots
-- Subdivisions: smooth out timeplots to create even weirder sounds

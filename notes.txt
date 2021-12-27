@@ -4,19 +4,6 @@ the name "realisr" comes from:
     The theoretical backing of this project was projecting music from complex time into real time, so literally "making real" or "realizing".
     So, its a double entendre of sorts :)
 
-"Classic" mode:
-    Split input audio into segments, stretch those segments and keep them connected; an LSR (linked segmented rescale)
-    Segments were always uniform in Realisr 1, but maybe allow the user to edit the initial segmentation as well
-"True timeplot" mode:
-    - simply take any timeplot and lay the real audio along it, then project to the real axis. This is what I was first (mistakenly) coding in Rust
-    - should have the option to pre-scale the audio to make up for the net pitch increase (since  everything will be higher pitched in this mode by default)
-
-
-DONE - Iterate through vectors to gather important info:
-    record max and min x values (to compute plot width)
-    record how far along the path each vector is (this lets us know later where each segment comes from in the input audio)
-    sum up total path length
-
 Illustration:
     p5.js for a demo, but this is not performant so should be replaced eventually with...
     D3? svg based, might be a good time to learn D3...
