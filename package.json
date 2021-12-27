@@ -4,11 +4,11 @@
   "description": "A massively improved second generation of Realisr",
   "main": "src/index.jsx",
   "scripts": {
-    "dev": "webpack server",
+    "dev": "webpack serve --open --config webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:wasm": "cargo build --target wasm32-unknown-unknown",
     "build:bindgen": "wasm-bindgen target/wasm32-unknown-unknown/debug/realisr_2.wasm --out-dir build",
-    "build": "npm run build:wasm && npm run build:bindgen && npx webpack"
+    "build": "npm run build:wasm && npm run build:bindgen && webpack --config webpack.prod.js"
   },
   "keywords": [],
   "author": "Andy Chamberlain <andychamberlainmusic@gmail.com>",
@@ -29,6 +29,7 @@
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.7.0"
+    "webpack-dev-server": "^4.7.0",
+    "webpack-merge": "^5.8.0"
   }
 }

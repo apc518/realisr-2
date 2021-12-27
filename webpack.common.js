@@ -4,18 +4,18 @@ const path = require("path");
 
 module.exports = {
   entry: "./src/index.jsx",
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: __dirname + "/public/index.html",
+      filename: "index.html"
+    }),
+    new WasmPackPlugin({
+      crateDirectory: path.resolve(__dirname, ".")
+    })
+  ],
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.[hash].js"
-  },
-  devServer: {
-    compress: true,
-    host: '0.0.0.0',
-    port: 8080,
-    hot: true,
-    static: './dist',
-    historyApiFallback: true,
-    open: true
   },
   module: {
     rules: [
@@ -28,18 +28,7 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: __dirname + "/public/index.html",
-      filename: "index.html"
-    }),
-    new WasmPackPlugin({
-      crateDirectory: path.resolve(__dirname, ".")
-    })
-  ],
   experiments: {
     asyncWebAssembly: true
   },
-  mode: "development",
-  devtool: 'inline-source-map',
 };

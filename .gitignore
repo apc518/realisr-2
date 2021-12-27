@@ -4,6 +4,8 @@ node_modules
 dist/*.module.wasm
 dist/bundle.*.js
 dist/index.html
+dist/*.map
+dist/*.LICENSE.txt
 build/realisr_2_bg.js
 build/realisr_2_bg.wasm
 build/realisr_2_bg.wasm.d.ts
