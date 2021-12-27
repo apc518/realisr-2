@@ -1,8 +1,5 @@
 use wasm_bindgen::prelude::*;
 
-extern crate web_sys;
-extern crate console_error_panic_hook;
-
 #[wasm_bindgen]
 pub struct WalkPoint {
     x: f32,
@@ -34,10 +31,11 @@ impl TimePlot {
     }
 
     // calculate useful information about the time plot and its walkpoints
-    pub fn calc_stats(&mut self) {
+    // initialize the output buffer and return the length of the output buffer
+    pub fn init(&mut self) {
         let mut length: f32 = 0.0;
 
-        if self.points.len() == 0 { return }
+        if self.points.len() == 0 { return; }
 
         self.min_x = self.points[0].x;
         self.max_x = self.points[0].x;
@@ -67,6 +65,10 @@ impl TimePlot {
         }
 
         self.path_length = length;
+
+        let output_length = (self.in_audio_buffer.len() as f32 * ((self.max_x - self.min_x) / self.path_length)).floor() as usize;
+
+        self.out_audio_buffer = vec![0.0; output_length];
     }
 
     pub fn get_path_length(&self) -> f32 {
@@ -97,21 +99,18 @@ impl TimePlot {
     }
     
     pub fn compute_true_timeplot(&mut self) {
-        // compute stats
-        self.calc_stats();
+        // compute stats if stats are not initialized yet (indicated by path length being negative)
+        if self.path_length < 0.0 {
+            self.init();
+        }
         
         // compute length of output buffer
-        let output_buffer_length = (self.in_audio_buffer.len() as f32 * ((self.max_x - self.min_x) / self.path_length)).floor() as usize;
+        let output_buffer_length = self.out_audio_buffer.len();
 
         if output_buffer_length < 1 {
             return;
         }
         
-        // initialize output buffer as zeroes
-        for _i in 0..output_buffer_length {
-            self.out_audio_buffer.push(0.0);
-        }
-
         // web_sys::console::log_1(&format!("output_buffer_length: {}", output_buffer_length).into());
         // web_sys::console::log_1(&format!("self.out_audio_buffer.len(): {}", self.out_audio_buffer.len()).into());
         
@@ -182,24 +181,25 @@ impl TimePlot {
         }
     }
     
-    pub fn add_input_audio_frame(&mut self, val: f32) {
-        self.in_audio_buffer.push(val);
+    pub fn populate_input_audio_buffer(&mut self, val: &JsValue) {
+        let f32_arr = js_sys::Float32Array::new(val);
+        self.in_audio_buffer = f32_arr.to_vec();
     }
 
     pub fn get_out_audio_buffer(&self) -> *const f32 {
         self.out_audio_buffer.as_ptr()
     }
 
-    pub fn get_out_audio_buffer_length(&self) -> u32 {
-        self.out_audio_buffer.len() as u32
+    pub fn get_out_audio_buffer_length(&self) -> usize {
+        self.out_audio_buffer.len()
     }
-    
+
     pub fn new() -> TimePlot{
         console_error_panic_hook::set_once();
 
         TimePlot{
             points: vec![],
-            path_length: 0.0,
+            path_length: -1.0, // construct with nonsense value to indicate that this timeplot is uninitialized
             min_x: f32::INFINITY,
             max_x: f32::NEG_INFINITY,
             in_audio_buffer: vec![],
