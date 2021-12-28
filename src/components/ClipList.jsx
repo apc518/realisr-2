@@ -13,19 +13,22 @@ export default function ClipList({ clips, setClips }){
     return (
         <div style={{
             display: 'grid',
-            gap: 0,
-            gridTemplateColumns: 'repeat(3, 1fr)'
+            gap: 10,
+            placeItems: 'flex-start',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateRows: 'auto 1fr',
+            marginLeft: 10,
+            height: 'fit-content'
         }}>
             {clips.map((clip, idx) => (
                 <div 
                     key={idx}
                     style={{
-                        width: 'fit-content',
+                        width: '100%',
                         height: 'fit-content',
                         background: '#444',
                         textAlign: 'center',
                         padding: 5,
-                        margin: 5,
                         maxWidth: 200,
                         wordWrap: 'break-word',
                         borderRadius: 10
@@ -38,7 +41,7 @@ export default function ClipList({ clips, setClips }){
                             audioCtx = new AudioContext();
                         }
 
-                        if (timeplot.length < 2){
+                        if (timeplot.points.length < 2){
                             Swal.fire({
                                 icon: "error",
                                 text: "A timeplot with no segments? Not gonna work. Click around on the green canvas!"

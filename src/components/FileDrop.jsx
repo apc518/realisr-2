@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import Swal from "sweetalert2";
 
-import { AudioContext, Clip, canvasWidth } from '../App.jsx';
+import { AudioContext, canvasWidth, globalButtonsWidth } from '../App.jsx';
+
+import { Clip } from "../classes/Clip.js";
 
 const inactiveColor = "#d0d";
 const activeColor = "#d77";
@@ -13,7 +16,7 @@ export default function FileDrop({ audioCtx, clips, setClips }){
             audioCtx = new AudioContext();
         }
 
-        const newClips = [];
+        const newClips = clips.slice();
 
         const files = [];
         for(let f of fileList){
@@ -22,27 +25,38 @@ export default function FileDrop({ audioCtx, clips, setClips }){
 
         let i = 0;
 
+        const failedFilenames = [];
+
+        const trySetClips = () => {
+            if(i === files.length - 1){
+                setClips(newClips);
+
+                if(failedFilenames.length > 0){
+                    console.log(failedFilenames);
+                    console.log(failedFilenames.toString());
+                    Swal.fire({
+                        icon: 'error',
+                        html: `These files could not be decoded as audio:<br/>${failedFilenames.toString().replaceAll(",", ", ")}`
+                    });
+                }
+            }
+            
+            i++;
+        }
+
         for(let f of files){
-            console.log("files at top of loop", files);
             f.arrayBuffer().then(res => {
-                console.log("files after arrayBuffer()", files, res);
                 audioCtx.decodeAudioData(res).then(decodedData => {
                     console.log(decodedData);
                     
                     newClips.push(new Clip(decodedData, f.name));
 
-                    console.log("files", files);
-                    console.log("files length", files.length);
-                    console.log("new clips:", newClips);
-                    
-                    if(i === files.length - 1){
-                        console.log("general kenobi?");
-                        console.log(newClips);
-                        setClips(newClips);
-                    }
+                    trySetClips();
+                })
+                .catch(() => {
+                    failedFilenames.push(f.name);
 
-                    i++;
-                    console.log("i", i);
+                    trySetClips();
                 });
             })
             .catch(e => console.error(e));
@@ -52,12 +66,11 @@ export default function FileDrop({ audioCtx, clips, setClips }){
     return (
         <div 
             style={{
-                width: canvasWidth,
+                width: canvasWidth - globalButtonsWidth,
                 height: 200,
                 backgroundColor: bgColor,
                 display: 'grid',
                 placeItems: 'center',
-                borderRadius: 10,
                 cursor: 'pointer'
             }}
 
@@ -95,7 +108,9 @@ export default function FileDrop({ audioCtx, clips, setClips }){
         >
             <div style={{
                 maxWidth: 150,
-                textAlign: 'center'
+                textAlign: 'center',
+                fontSize: 20,
+                userSelect: 'none'
             }}>
                 Drag and drop audio files here!
             </div>
