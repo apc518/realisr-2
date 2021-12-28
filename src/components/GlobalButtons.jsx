@@ -1,7 +1,7 @@
 import React from "react";
 import Swal from "sweetalert2";
 
-import { timeplot, globalButtonsWidth, audioBufferNodes } from "../App.jsx";
+import { timeplot, globalButtonsWidth, audioBufferNodes, canvasWidth } from "../App.jsx";
 
 export default function GlobalButtons({ resetClipsOutputs }) {
     return (
@@ -95,13 +95,45 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                                 }
                             })
                         }
-
                     }
                     
                     fileInput.click();
                 }}
                 className="globalBtn"
             >Load timeplot</button>
+
+            <button
+                onClick={() => {
+                    timeplot.points = [{x: 0, y: 0}];
+                    let numberOfSegments = Math.round(Math.random() * 24 + 1);
+                    for(let i = 1; i <= numberOfSegments; i++){
+                        let theta_min = 0;
+                        let theta_max = 360 * Math.PI / 180;
+                        let theta = Math.random() * (theta_max - theta_min) + theta_min;
+                        let dx = 20 * Math.cos(theta);
+                        let dy = 20 * Math.sin(theta);
+                        timeplot.points.push({x: timeplot.points[i-1].x + dx, y: timeplot.points[i-1].y + dy});
+                    }
+                    
+                    // find point farthest from center
+                    let maxDistance = -1;
+                    for(let point of timeplot.points) {
+                        if(Math.sqrt(point.x * point.x + point.y * point.y) > maxDistance) {
+                            maxDistance = Math.sqrt(point.x * point.x + point.y * point.y);
+                        }
+                    }
+                    
+                    // rescale all points so the farthest one out is 240 away from center
+                    let ratio = (canvasWidth / 2 - 10) / maxDistance;
+                    for(let point of timeplot.points){
+                        point.x *= ratio;
+                        point.y *= ratio;
+                    }
+                }}
+            className="globalBtn"
+            >
+                Random Walk
+            </button>
         </div>
     )
 }
