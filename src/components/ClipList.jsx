@@ -27,7 +27,8 @@ export default function ClipList({ clips, setClips }){
                         padding: 5,
                         margin: 5,
                         maxWidth: 200,
-                        wordWrap: 'break-word'
+                        wordWrap: 'break-word',
+                        borderRadius: 10
                     }}
                 >
                 {clip.name}<br/>

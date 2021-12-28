@@ -8,6 +8,47 @@ const activeColor = "#d77";
 export default function FileDrop({ audioCtx, clips, setClips }){
     const [bgColor, setBgColor] = useState(inactiveColor);
 
+    const loadFiles = fileList => {
+        if(!audioCtx){
+            audioCtx = new AudioContext();
+        }
+
+        const newClips = [];
+
+        const files = [];
+        for(let f of fileList){
+            files.push(f);
+        }
+
+        let i = 0;
+
+        for(let f of files){
+            console.log("files at top of loop", files);
+            f.arrayBuffer().then(res => {
+                console.log("files after arrayBuffer()", files, res);
+                audioCtx.decodeAudioData(res).then(decodedData => {
+                    console.log(decodedData);
+                    
+                    newClips.push(new Clip(decodedData, f.name));
+
+                    console.log("files", files);
+                    console.log("files length", files.length);
+                    console.log("new clips:", newClips);
+                    
+                    if(i === files.length - 1){
+                        console.log("general kenobi?");
+                        console.log(newClips);
+                        setClips(newClips);
+                    }
+
+                    i++;
+                    console.log("i", i);
+                });
+            })
+            .catch(e => console.error(e));
+        }
+    }
+
     return (
         <div 
             style={{
@@ -15,7 +56,24 @@ export default function FileDrop({ audioCtx, clips, setClips }){
                 height: 200,
                 backgroundColor: bgColor,
                 display: 'grid',
-                placeItems: 'center'
+                placeItems: 'center',
+                borderRadius: 10,
+                cursor: 'pointer'
+            }}
+
+            onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const inputElem = document.createElement('input');
+                inputElem.type = 'file';
+                inputElem.multiple = true;
+
+                inputElem.onchange = () => {
+                    loadFiles(inputElem.files);
+                }
+
+                inputElem.click();
             }}
 
             onDragOver={e => {
@@ -32,46 +90,7 @@ export default function FileDrop({ audioCtx, clips, setClips }){
 
                 setBgColor(inactiveColor);
 
-                if(!audioCtx){
-                    audioCtx = new AudioContext();
-                }
-                
-                const newClips = clips.slice();
-
-                let i = 0;
-
-                console.log("at first, files: ", e.dataTransfer.files);
-
-                let files = [];
-                for(let f of e.dataTransfer.files){
-                    files.push(f);
-                }
-
-                for(let f of files){
-                    console.log("files at top of loop", files);
-                    f.arrayBuffer().then(res => {
-                        console.log("files after arrayBuffer()", files, res);
-                        audioCtx.decodeAudioData(res).then(decodedData => {
-                            console.log(decodedData);
-                            
-                            newClips.push(new Clip(decodedData, f.name));
-
-                            console.log("files", files);
-                            console.log("files length", files.length);
-                            console.log("new clips:", newClips);
-                            
-                            if(i === files.length - 1){
-                                console.log("general kenobi?");
-                                console.log(newClips);
-                                setClips(newClips);
-                            }
-
-                            i++;
-                            console.log("i", i);
-                        });
-                    })
-                    .catch(e => console.error(e));
-                }
+                loadFiles(e.dataTransfer.files);
             }}
         >
             <div style={{
