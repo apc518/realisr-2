@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ReactP5Wrapper } from "react-p5-wrapper";
 
 import { TimePlot } from '../build/realisr_2';
 import { memory } from '../build/realisr_2_bg.wasm';
 import ClipList from "./components/ClipList.jsx";
 
 import FileDrop from "./components/FileDrop.jsx";
+import TimeplotEditor from "./components/TimeplotEditor.jsx";
 
 export const AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -170,58 +170,6 @@ export default function App({ wasm }){
         }
     }
 
-    const sketch = p5 => {
-        p5.setup = () => p5.createCanvas(canvasWidth, canvasHeight);
-    
-        p5.draw = () => {
-            p5.background(46, 255, 63);
-            p5.strokeWeight(2);
-            if(timeplot.length == 1){
-                p5.push();
-                p5.fill(255, 0, 0);
-                p5.noStroke();
-                p5.ellipse(canvasWidth / 2, canvasHeight / 2, 6);
-                p5.pop();
-            }
-            for(let i = 1; i < timeplot.length; i++){
-                // line 
-                p5.push();
-                p5.noFill();
-                p5.stroke(255, 0, 0);
-                let [prevX, prevY] = [timeplot[i-1].x, -timeplot[i-1].y];
-                let [x, y] = [timeplot[i].x, -timeplot[i].y];
-                p5.translate(canvasWidth / 2, canvasHeight / 2);
-                p5.line(prevX, prevY, x, y);
-    
-                // arrowhead
-                p5.noStroke();
-                p5.fill(255, 0, 0);
-                let angle = p5.atan2(prevY - y, prevX - x);
-                p5.translate(x, y);
-                p5.rotate(angle - p5.HALF_PI);
-                let triSize = 10;
-                p5.triangle(0, 0, -triSize/2, triSize, triSize/2, triSize);
-                p5.pop();
-            }
-        }
-    
-        p5.mousePressed = () => {
-            if (p5.mouseX < canvasWidth && p5.mouseX > 0 && p5.mouseY < canvasHeight && p5.mouseY > 0){
-                timeplot.push({ x: p5.mouseX - (canvasWidth / 2), y: - p5.mouseY + (canvasHeight / 2) });
-                resetClipsOutputs();
-            }
-        }
-    
-        p5.keyPressed = e => {
-            if(e.key === "Backspace"){
-                if (timeplot.length > 1) {
-                    timeplot.splice(timeplot.length - 1, 1);
-                    resetClipsOutputs();
-                }
-            }
-        }
-    }
-
     return (
         <div
             style={{
@@ -265,7 +213,7 @@ export default function App({ wasm }){
                 >Clear timeplot</button>
             </div>
 
-            <ReactP5Wrapper sketch={sketch} />
+            <TimeplotEditor resetClipsOutputs={resetClipsOutputs} timeplot={timeplot}/>
 
             <ClipList clips={clips} setClips={setClips} />
 
