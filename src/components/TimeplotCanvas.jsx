@@ -16,39 +16,49 @@ let canvas;
 export default function TimeplotEditor({ resetClipsOutputs }){
     const sketch = p5 => {
         const gotFile = f => {
-            sketchBgColor = sketchBgColorDefault;
-            if(f.subtype === 'json'){
-                const newTimeplot = f.data;
-                for(let key of Object.keys(newTimeplot)){
-                    try{
-                        timeplot[key] = newTimeplot[key];
-                    }
-                    catch{
-                        continue;
-                    }
-                }
-            }
-            else{
+            const invalidTimeplotFile = () => {
                 Swal.fire({
                     icon: 'error',
                     text: `${f.name} is not a valid timeplot.`
                 });
             }
-        }
-    
-        const draggingOver = () => {
-            sketchBgColor = sketchBgColorOnDragover; 
+
+            if(f.subtype === 'json'){
+                const newTimeplot = f.data;
+                if(Object.keys(newTimeplot).indexOf("points") < 0){
+                    invalidTimeplotFile();
+                }
+                else{
+                    for(let key of Object.keys(newTimeplot)){
+                        try{
+                            timeplot[key] = newTimeplot[key];
+                        }
+                        catch{
+                            continue;
+                        }
+                    }
+                }
+            }
+            else{
+                invalidTimeplotFile();
+            }
+            
+            sketchBgColor = sketchBgColorDefault;
         }
 
-        const doOnMoustOut = () => {
+        const onDragOver = () => {
+            sketchBgColor = sketchBgColorOnDragover;
+        }
+
+        const onDragLeave = () => {
             sketchBgColor = sketchBgColorDefault;
         }
 
         p5.setup = () => {
             canvas = p5.createCanvas(canvasWidth, canvasHeight);
             canvas.drop(gotFile);
-            canvas.dragOver(draggingOver);
-            canvas.mouseOut(doOnMoustOut);
+            canvas.dragOver(onDragOver);
+            canvas.dragLeave(onDragLeave);
         };
     
         p5.draw = () => {

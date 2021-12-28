@@ -86,6 +86,7 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                                             continue;
                                         }
                                     }
+                                    resetClipsOutputs();
                                 }
                                 catch(e){
                                     Swal.fire({
@@ -99,6 +100,7 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                     
                     fileInput.click();
                 }}
+
                 className="globalBtn"
             >Load timeplot</button>
 
@@ -129,6 +131,8 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                         point.x *= ratio;
                         point.y *= ratio;
                     }
+
+                    resetClipsOutputs();
                 }}
             className="globalBtn"
             >

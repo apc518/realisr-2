@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 import ClipList from "./components/ClipList.jsx";
-import FileDrop from "./components/FileDrop.jsx";
+import AudioFileDrop from "./components/AudioFileDrop.jsx";
 import GlobalButtons from "./components/GlobalButtons.jsx";
-import TimeplotEditor from "./components/TimeplotEditor.jsx";
+import TimeplotCanvas from "./components/TimeplotCanvas.jsx";
 
 export const AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -74,7 +74,7 @@ export default function App({ wasm }){
             }}>
                 <div>
                     <div style={{ display: "flex" }}>
-                        <FileDrop 
+                        <AudioFileDrop 
                             files={files}
                             setFiles={setFiles}
                             audioCtx={audioCtx}
@@ -85,7 +85,7 @@ export default function App({ wasm }){
                         <GlobalButtons clips={clips} setClips={setClips} resetClipsOutputs={resetClipsOutputs} />
                     </div>
 
-                    <TimeplotEditor resetClipsOutputs={resetClipsOutputs} />
+                    <TimeplotCanvas resetClipsOutputs={resetClipsOutputs} />
                 </div>
                 
                 <ClipList clips={clips} setClips={setClips} />

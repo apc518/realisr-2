@@ -8,7 +8,7 @@ import { Clip } from "../classes/Clip.js";
 const inactiveColor = "#d0d";
 const activeColor = "#d77";
 
-export default function FileDrop({ audioCtx, clips, setClips }){
+export default function AudioAudioFileDrop({ audioCtx, clips, setClips }){
     const [bgColor, setBgColor] = useState(inactiveColor);
 
     const loadFiles = fileList => {
@@ -95,6 +95,13 @@ export default function FileDrop({ audioCtx, clips, setClips }){
 
                 setBgColor(activeColor);
                 e.dataTransfer.dropEffect = 'copy';
+            }}
+
+            onDragLeave={e => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                setBgColor(inactiveColor);
             }}
 
             onDrop={e => {

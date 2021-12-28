@@ -44,7 +44,7 @@ export default function ClipList({ clips, setClips }){
                         if (timeplot.points.length < 2){
                             Swal.fire({
                                 icon: "error",
-                                text: "A timeplot with no segments? Not gonna work. Click around on the green canvas!"
+                                text: "A timeplot with no segments? Not gonna work. Click around on the gray canvas!"
                             })
                         }
                         else if (clip.inAudioBuffer.numberOfChannels < 1) {
