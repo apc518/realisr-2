@@ -66,7 +66,8 @@ export default function App({ wasm }){
                 Finally click the Realise button that will appear below!
             </p>
 
-            <button onClick={() => console.log(clips)}>log clips</button>
+            {/* <button onClick={() => console.log(clips)}>log clips</button> */}
+            {/* <button onClick={() => console.log(timeplot.points)}>log points</button> */}
 
             <div style={{
                 display: "flex"

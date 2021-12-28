@@ -1,17 +1,58 @@
 import React from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
+import Swal from "sweetalert2";
 
 import { canvasWidth, canvasHeight, timeplot } from "../App.jsx";
 
 // matplotlib default colors, omage to Realisr 1
 const lineColors = ['#0099dc', '#fc4f30', '#e5ae38', '#6db04f', '#bbb', '#c12fac'];
 
+const sketchBgColorDefault = "#444";
+const sketchBgColorOnDragover = "#111";
+let sketchBgColor = sketchBgColorDefault;
+
+let canvas;
+
 export default function TimeplotEditor({ resetClipsOutputs }){
     const sketch = p5 => {
-        p5.setup = () => p5.createCanvas(canvasWidth, canvasHeight);
+        const gotFile = f => {
+            sketchBgColor = sketchBgColorDefault;
+            if(f.subtype === 'json'){
+                const newTimeplot = f.data;
+                for(let key of Object.keys(newTimeplot)){
+                    try{
+                        timeplot[key] = newTimeplot[key];
+                    }
+                    catch{
+                        continue;
+                    }
+                }
+            }
+            else{
+                Swal.fire({
+                    icon: 'error',
+                    text: `${f.name} is not a valid timeplot.`
+                });
+            }
+        }
+    
+        const draggingOver = () => {
+            sketchBgColor = sketchBgColorOnDragover; 
+        }
+
+        const doOnMoustOut = () => {
+            sketchBgColor = sketchBgColorDefault;
+        }
+
+        p5.setup = () => {
+            canvas = p5.createCanvas(canvasWidth, canvasHeight);
+            canvas.drop(gotFile);
+            canvas.dragOver(draggingOver);
+            canvas.mouseOut(doOnMoustOut);
+        };
     
         p5.draw = () => {
-            p5.background('#444');
+            p5.background(sketchBgColor);
             p5.strokeWeight(2);
             if(timeplot.points.length == 1){
                 p5.push();
@@ -43,7 +84,7 @@ export default function TimeplotEditor({ resetClipsOutputs }){
                 p5.pop();
             }
         }
-    
+
         p5.mousePressed = () => {
             if (p5.mouseX < canvasWidth && p5.mouseX > 0 && p5.mouseY < canvasHeight && p5.mouseY > 0){
                 timeplot.points.push({ x: p5.mouseX - (canvasWidth / 2), y: - p5.mouseY + (canvasHeight / 2) });
@@ -62,6 +103,6 @@ export default function TimeplotEditor({ resetClipsOutputs }){
     }
 
     return (
-        <ReactP5Wrapper sketch={sketch}/>
+        <ReactP5Wrapper sketch={sketch} />
     )
 }
