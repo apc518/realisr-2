@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 
-import { AudioContext, canvasWidth, globalButtonsWidth, audioCtx, initAudioCtx } from '../App.jsx';
+import { canvasWidth, globalButtonsWidth, audioCtx, initAudioCtx, lightTextColor } from '../App.jsx';
 
 import { Clip } from "../classes/Clip.js";
 
@@ -64,14 +64,16 @@ export default function AudioAudioFileDrop({ clips, setClips }){
     }
 
     return (
-        <div 
+        <button 
             style={{
                 width: canvasWidth - globalButtonsWidth,
                 height: 200,
                 backgroundColor: bgColor,
+                color: lightTextColor,
                 display: 'grid',
                 placeItems: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                border: 'none'
             }}
 
             onClick={e => {
@@ -121,6 +123,6 @@ export default function AudioAudioFileDrop({ clips, setClips }){
             }}>
                 Drag and drop audio files here!
             </div>
-        </div>
+        </button>
     )
 }

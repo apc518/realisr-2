@@ -11,6 +11,7 @@ export const AudioContext = window.AudioContext || window.webkitAudioContext;
 export const canvasWidth = 500;
 export const canvasHeight = 500;
 export const globalButtonsWidth = 180;
+export const lightTextColor = "#eee";
 
 export let audioCtx;
 export let masterGainNode;
@@ -80,7 +81,7 @@ export default function App(){
                 position: 'absolute',
                 left: 0,
                 top: 0,
-                color: '#eee',
+                color: lightTextColor,
                 paddingLeft: 10,
                 paddingTop: 10
             }}
