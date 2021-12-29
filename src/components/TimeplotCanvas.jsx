@@ -37,6 +37,8 @@ export default function TimeplotEditor({ resetClipsOutputs }){
                             continue;
                         }
                     }
+                    
+                    resetClipsOutputs();
                 }
             }
             else{

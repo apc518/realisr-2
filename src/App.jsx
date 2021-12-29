@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import Swal from "sweetalert2";
 
 import ClipList from "./components/ClipList.jsx";
 import AudioFileDrop from "./components/AudioFileDrop.jsx";
 import GlobalButtons from "./components/GlobalButtons.jsx";
 import TimeplotCanvas from "./components/TimeplotCanvas.jsx";
+import PlaybackRateControl from "./components/PlaybackRateControl.jsx";
 
 export const AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -17,6 +17,10 @@ export let masterGainNode;
 
 export const globalVolumeDefault = 0.5264; // this is 80% on the slider
 export let globalSpeed = 1;
+
+export const setGlobalSpeed = s => {
+    globalSpeed = s;
+}
 
 export const initAudioCtx = () => {
     audioCtx = new AudioContext();
@@ -48,7 +52,6 @@ const logb = (base, x) => {
 export default function App(){
     const [files, setFiles] = useState([]);
     const [clips, setClips] = useState([]); // list of Clips (instances of the class defined above)
-    const [globSpeedDisplay, setGlobSpeedDisplay] = useState(1);
     
     useEffect(() => {
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -82,7 +85,7 @@ export default function App(){
                 paddingTop: 10
             }}
         >
-<label htmlFor="globalVolumeSlider">Master Volume: </label>
+            <label htmlFor="globalVolumeSlider">Master Volume: </label>
             <input
                 id="globalVolumeSlider"
                 type="range"
@@ -97,39 +100,14 @@ export default function App(){
                     const n = 1 / (1 - logb(1 / tension, 1 + (1 / tension)));
                     
                     const val = Math.pow(1 / tension, 1 - (e.target.value / 100) / n) - 1 / tension;
-                    console.log(val);
                     masterGainNode.gain.value = val;
                 }}
                 style={{
                     display: 'inline-block',
                     verticalAlign: 'middle'
                 }}
-            />
-            <br/>
-            <label htmlFor="globalSpeedSlider">Playback Rate: </label>
-            <input
-                id="globalSpeedSlider"
-                type="range"
-                onChange={e => {
-                    if(!audioCtx){
-                        initAudioCtx();
-                    }
-
-                    let val = Math.pow(1/10, (1 - e.target.value * 2 / 100));
-                    
-                    setGlobSpeedDisplay(val);
-                    globalSpeed = val;
-                    
-                    for(let abn of audioBufferNodes){
-                        abn.playbackRate.value = val;
-                    }
-                }}
-                style={{
-                    display: 'inline-block',
-                    verticalAlign: 'middle'
-                }}
-            />
-            <span htmlFor="globalSpeedSlider">{globSpeedDisplay.toFixed(2)}</span><br/>
+            /> <br/>
+            <PlaybackRateControl/>
 
             {/* <button onClick={() => console.log(clips)}>log clips</button> */}
             {/* <button onClick={() => console.log(timeplot.points)}>log points</button> */}
