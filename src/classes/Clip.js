@@ -140,6 +140,5 @@ export class Clip {
         }
 
         this.blob =  URL.createObjectURL(bufferToWave(this.outAudioBuffer));
-        console.log(this.blob);
     }
 }

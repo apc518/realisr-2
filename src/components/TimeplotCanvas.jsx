@@ -1,8 +1,64 @@
 import React from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import Swal from "sweetalert2";
+import { cloneDeep } from "lodash";
 
-import { canvasWidth, canvasHeight, timeplot } from "../App.jsx";
+import { canvasWidth, canvasHeight, timeplot, timeplotDefault } from "../App.jsx";
+
+export const invalidTimeplotFile = (filename, details) => {
+    Swal.fire({
+        icon: 'error',
+        html: `${filename} is not a valid timeplot.<br/>Details: ${details}`
+    });
+}
+
+export const loadTimeplotObj = (newTimeplot, name, resetClipsOutputs) => {
+    try{
+        // try to read and confirm type of points field
+        if(!("points" in newTimeplot)){
+            throw new Error("Field 'points' was not found.");
+        }
+
+        if(!Array.isArray(newTimeplot.points)){
+            throw new Error("Field 'points' must be a list.");
+        }
+
+        if(newTimeplot.points.length < 2){
+            throw new Error("Field 'points' must be a list of at least 2 points.");
+        }
+
+        for(let point of newTimeplot.points){
+            if(typeof point.x !== 'number' || typeof point.y !== 'number'){
+                throw new Error("Field 'points' must be a list of objects each containing an 'x' and a 'y' property, both of which must be numbers.");
+            }
+        }
+
+        for(let key of Object.keys(newTimeplot)){
+            // only add the field if its part of the template we have
+            if(!(key in timeplotDefault)){
+                throw new Error(`Field '${key}' is unrecognized.`);
+            }
+            else if(typeof timeplotDefault[key] !== typeof newTimeplot[key]){
+                throw new Error(`Field '${key}' is recognized but has a value of type ${typeof newTimeplot[key]}. '${key}' should have a value of type ${typeof timeplotDefault[key]}.`);
+            }
+            else{
+                timeplot[key] = newTimeplot[key];
+            }
+        }
+
+        // set fields that are present in timeplotDefault but not in newTimeplot to the default value
+        for(let key of Object.keys(timeplotDefault)){
+            if(!(key in newTimeplot)){
+                timeplot[key] = cloneDeep(timeplotDefault[key]);
+            }
+        }
+        
+        resetClipsOutputs();
+    }
+    catch(e){
+        invalidTimeplotFile(name, e.message);
+    }
+}
 
 // matplotlib default colors, omage to Realisr 1
 const lineColors = ['#0099dc', '#fc4f30', '#e5ae38', '#6db04f', '#bbb', '#c12fac'];
@@ -16,33 +72,12 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
 
     const sketch = p5 => {
         const gotFile = f => {
-            const invalidTimeplotFile = () => {
-                Swal.fire({
-                    icon: 'error',
-                    text: `${f.name} is not a valid timeplot.`
-                });
-            }
-
             if(f.subtype === 'json'){
                 const newTimeplot = f.data;
-                if(Object.keys(newTimeplot).indexOf("points") < 0){
-                    invalidTimeplotFile();
-                }
-                else{
-                    for(let key of Object.keys(newTimeplot)){
-                        try{
-                            timeplot[key] = newTimeplot[key];
-                        }
-                        catch{
-                            continue;
-                        }
-                    }
-                    
-                    resetClipsOutputs();
-                }
+                loadTimeplotObj(newTimeplot, f.name, resetClipsOutputs);
             }
             else{
-                invalidTimeplotFile();
+                invalidTimeplotFile(f.name, "Not a json file");
             }
             
             sketchBgColor = sketchBgColorDefault;
@@ -75,9 +110,9 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
 
                 p5.textAlign(p5.CENTER);
                 p5.textFont("Trebuchet MS");
-                p5.textSize(22);
+                p5.textSize(20);
                 p5.fill("#aaa");
-                p5.text("Click in here to draw a timeplot", canvasWidth / 2, canvasHeight / 2 - 20);
+                p5.text("Click to draw, or drag and drop a timeplot file", canvasWidth / 2, canvasHeight / 2 - 20);
                 p5.text("Press backspace to delete the last segment", canvasWidth / 2, canvasHeight / 2 + 35);
             }
             for(let i = 1; i < timeplot.points.length; i++){

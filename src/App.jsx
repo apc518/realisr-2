@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+import { cloneDeep } from "lodash";
+
 import ClipList from "./components/ClipList.jsx";
 import AudioFileDrop from "./components/AudioFileDrop.jsx";
 import GlobalButtons from "./components/GlobalButtons.jsx";
@@ -31,14 +33,16 @@ export const initAudioCtx = () => {
     masterGainNode.connect(audioCtx.destination);
 }
 
-export const timeplot = {
+export const timeplotDefault = Object.freeze({
     falloffExponent: 0,
     finalSpeed: 1,
     subdivisions: 1,
     points: [
-        { x: 0, y: 0 }
+        {x: 0, y: 0}
     ]
-}
+});
+
+export const timeplot = cloneDeep(timeplotDefault);
 
 export const audioBufferNodes = [];
 
@@ -148,8 +152,8 @@ export default function App(){
                 color: "#888",
                 lineHeight: '1.5rem'
             }}>
-            <div>Site by <a class="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
-            <div><a class="footerLink" target="_blank" rel="noreferrer" href="https://github.com/apc518/realisr-2" title="Realisr 2 Github">GitHub</a></div>
+            <div>Site by <a className="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
+            <div><a className="footerLink" target="_blank" rel="noreferrer" href="https://github.com/apc518/realisr-2" title="Realisr 2 Github">GitHub</a></div>
             </footer>
         </div>
     );

@@ -2,6 +2,7 @@ import React from "react";
 import Swal from "sweetalert2";
 
 import { timeplot, globalButtonsWidth, audioBufferNodes, canvasWidth } from "../App.jsx";
+import { loadTimeplotObj } from "./TimeplotCanvas.jsx";
 
 export default function GlobalButtons({ resetClipsOutputs }) {
     return (
@@ -30,6 +31,14 @@ export default function GlobalButtons({ resetClipsOutputs }) {
 
             <button 
                 onClick={() => {
+                    if(timeplot.points.length < 2){
+                        Swal.fire({
+                            icon: "error",
+                            text: "Cannot save a timeplot with no segments! Draw some by clicking on the gray canvas."
+                        });
+                        return;
+                    }
+
                     let plotJson = JSON.stringify(timeplot);
 
                     let blob = URL.createObjectURL(new Blob([plotJson], { type: 'application/json' }));
@@ -78,20 +87,12 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                             f.text().then(res => {
                                 try{
                                     const newTimeplot = JSON.parse(res);
-                                    for(let key of Object.keys(newTimeplot)){
-                                        try{
-                                            timeplot[key] = newTimeplot[key];
-                                        }
-                                        catch{
-                                            continue;
-                                        }
-                                    }
-                                    resetClipsOutputs();
+                                    loadTimeplotObj(newTimeplot, f.name, resetClipsOutputs);
                                 }
                                 catch(e){
                                     Swal.fire({
                                         icon: 'error',
-                                        text: 'Input file is not a valid timeplot.'
+                                        text: `${f.name} is not a valid timeplot.`
                                     })
                                 }
                             })

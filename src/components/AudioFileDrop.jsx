@@ -32,8 +32,6 @@ export default function AudioAudioFileDrop({ clips, setClips }){
                 setClips(newClips);
 
                 if(failedFilenames.length > 0){
-                    console.log(failedFilenames);
-                    console.log(failedFilenames.toString());
                     Swal.fire({
                         icon: 'error',
                         html: `These files could not be decoded as audio:<br/>${failedFilenames.toString().replaceAll(",", ", ")}`
