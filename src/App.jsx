@@ -12,6 +12,7 @@ export const canvasWidth = 500;
 export const canvasHeight = 500;
 export const globalButtonsWidth = 180;
 export const lightTextColor = "#eee";
+export const lightGrayUI = "#444";
 
 export let audioCtx;
 export let masterGainNode;
@@ -83,32 +84,38 @@ export default function App(){
                 top: 0,
                 color: lightTextColor,
                 paddingLeft: 10,
-                paddingTop: 10
+                paddingTop: 10,
+                minHeight: '100vh',
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column'
             }}
         >
-            <label htmlFor="globalVolumeSlider">Master Volume: </label>
-            <input
-                id="globalVolumeSlider"
-                type="range"
-                defaultValue={80}
-                onChange={e => {
-                    if(!audioCtx){
-                        initAudioCtx();
-                    }
+            <div id="globalSliders">
+                <label htmlFor="globalVolumeSlider">Master Volume: </label>
+                <input
+                    id="globalVolumeSlider"
+                    type="range"
+                    defaultValue={80}
+                    onChange={e => {
+                        if(!audioCtx){
+                            initAudioCtx();
+                        }
 
-                    // use exponential scale to go from 0,0 to 1,1 so the volume slider feels more natural
-                    const tension = 10; // how extreme the curve is (higher = more extreme, slower start faster end)
-                    const n = 1 / (1 - logb(1 / tension, 1 + (1 / tension)));
-                    
-                    const val = Math.pow(1 / tension, 1 - (e.target.value / 100) / n) - 1 / tension;
-                    masterGainNode.gain.value = val;
-                }}
-                style={{
-                    display: 'inline-block',
-                    verticalAlign: 'middle'
-                }}
-            /> <br/>
-            <PlaybackRateControl/>
+                        // use exponential scale to go from 0,0 to 1,1 so the volume slider feels more natural
+                        const tension = 10; // how extreme the curve is (higher = more extreme, slower start faster end)
+                        const n = 1 / (1 - logb(1 / tension, 1 + (1 / tension)));
+                        
+                        const val = Math.pow(1 / tension, 1 - (e.target.value / 100) / n) - 1 / tension;
+                        masterGainNode.gain.value = val;
+                    }}
+                    style={{
+                        display: 'inline-block',
+                        verticalAlign: 'middle'
+                    }}
+                /> <br/>
+                <PlaybackRateControl/>
+            </div>
 
             {/* <button onClick={() => console.log(clips)}>log clips</button> */}
             {/* <button onClick={() => console.log(timeplot.points)}>log points</button> */}
@@ -129,11 +136,19 @@ export default function App(){
                         <GlobalButtons clips={clips} setClips={setClips} resetClipsOutputs={resetClipsOutputs} />
                     </div>
 
-                    <TimeplotCanvas resetClipsOutputs={resetClipsOutputs} />
+                    <TimeplotCanvas resetClipsOutputs={resetClipsOutputs} lightGrayUI={lightGrayUI} />
                 </div>
                 
                 <ClipList clips={clips} setClips={setClips} />
             </div>
+
+            <footer style={{
+                marginTop: 'auto',
+                height: '2rem',
+                color: "#666"
+            }}>
+            <div>Close icon made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+            </footer>
         </div>
     );
 }

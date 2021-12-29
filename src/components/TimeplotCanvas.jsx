@@ -7,13 +7,13 @@ import { canvasWidth, canvasHeight, timeplot } from "../App.jsx";
 // matplotlib default colors, omage to Realisr 1
 const lineColors = ['#0099dc', '#fc4f30', '#e5ae38', '#6db04f', '#bbb', '#c12fac'];
 
-const sketchBgColorDefault = "#444";
-const sketchBgColorOnDragover = "#111";
-let sketchBgColor = sketchBgColorDefault;
-
 let canvas;
 
-export default function TimeplotEditor({ resetClipsOutputs }){
+export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
+    const sketchBgColorDefault = lightGrayUI;
+    const sketchBgColorOnDragover = "#111";
+    let sketchBgColor = sketchBgColorDefault;
+
     const sketch = p5 => {
         const gotFile = f => {
             const invalidTimeplotFile = () => {
