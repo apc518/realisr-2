@@ -70,6 +70,13 @@ export default function TimeplotEditor({ resetClipsOutputs }){
                 p5.noStroke();
                 p5.ellipse(canvasWidth / 2, canvasHeight / 2, 6);
                 p5.pop();
+
+                p5.textAlign(p5.CENTER);
+                p5.textFont("Trebuchet MS");
+                p5.textSize(24);
+                p5.fill("#aaa");
+                p5.text("Click in here to draw the a timeplot", canvasWidth / 2, canvasHeight / 2 - 20);
+                p5.text("Press backspace to delete a segment", canvasWidth / 2, canvasHeight / 2 + 35);
             }
             for(let i = 1; i < timeplot.points.length; i++){
                 const color = lineColors[(i-1) % 6];

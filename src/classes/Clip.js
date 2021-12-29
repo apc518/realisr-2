@@ -1,8 +1,6 @@
-import { timeplot, AudioContext, audioBufferNodes, globalSpeed } from "../App.jsx";
+import { timeplot, audioBufferNodes, globalSpeed, audioCtx, initAudioCtx, masterGainNode } from "../App.jsx";
 import { TimePlot } from '../../build/realisr_2';
 import { memory } from '../../build/realisr_2_bg.wasm';
-
-let audioCtx;
 
 export class Clip {
     constructor(audioBuffer, name){
@@ -54,13 +52,13 @@ export class Clip {
 
     play(){
         if(!audioCtx){
-            audioCtx = new AudioContext();
+            initAudioCtx();
         }
 
         let source = audioCtx.createBufferSource();
         if(this.outAudioBuffer){
             source.buffer = this.outAudioBuffer;
-            source.connect(audioCtx.destination);
+            source.connect(masterGainNode);
             source.playbackRate.value = globalSpeed;
             audioBufferNodes.push(source);
             source.start();
@@ -69,13 +67,13 @@ export class Clip {
 
     playOriginal(){
         if(!audioCtx){
-            audioCtx = new AudioContext();
+            initAudioCtx();
         }
 
         let source = audioCtx.createBufferSource();
         if(this.inAudioBuffer){
             source.buffer = this.inAudioBuffer;
-            source.connect(audioCtx.destination);
+            source.connect(masterGainNode);
             source.playbackRate.value = globalSpeed;
             audioBufferNodes.push(source);
             source.start();

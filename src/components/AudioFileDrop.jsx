@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 
-import { AudioContext, canvasWidth, globalButtonsWidth } from '../App.jsx';
+import { AudioContext, canvasWidth, globalButtonsWidth, audioCtx, initAudioCtx } from '../App.jsx';
 
 import { Clip } from "../classes/Clip.js";
 
 const inactiveColor = "#d0d";
 const activeColor = "#d77";
 
-export default function AudioAudioFileDrop({ audioCtx, clips, setClips }){
+export default function AudioAudioFileDrop({ clips, setClips }){
     const [bgColor, setBgColor] = useState(inactiveColor);
 
     const loadFiles = fileList => {
         if(!audioCtx){
-            audioCtx = new AudioContext();
+            initAudioCtx();
         }
 
         const newClips = clips.slice();

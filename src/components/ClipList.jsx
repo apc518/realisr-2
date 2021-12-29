@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 
-import { AudioContext, timeplot } from '../App.jsx';
+import { initAudioCtx, timeplot } from '../App.jsx';
 
 let audioCtx;
 
@@ -38,7 +38,7 @@ export default function ClipList({ clips, setClips }){
                 <button
                     onClick={() => {
                         if(!audioCtx){
-                            audioCtx = new AudioContext();
+                            initAudioCtx();
                         }
 
                         if (timeplot.points.length < 2){

@@ -12,9 +12,18 @@ export const canvasWidth = 500;
 export const canvasHeight = 500;
 export const globalButtonsWidth = 180;
 
+export let audioCtx;
+export let masterGainNode;
+
+export const globalVolumeDefault = 0.5264; // this is 80% on the slider
 export let globalSpeed = 1;
 
-let audioCtx;
+export const initAudioCtx = () => {
+    audioCtx = new AudioContext();
+    masterGainNode = audioCtx.createGain();
+    masterGainNode.gain.value = globalVolumeDefault;
+    masterGainNode.connect(audioCtx.destination);
+}
 
 export const timeplot = {
     falloffExponent: 0,
@@ -27,7 +36,16 @@ export const timeplot = {
 
 export const audioBufferNodes = [];
 
-export default function App({ wasm }){
+/**
+ * returns the logarithm of x with in the input base
+ * @param {number} base 
+ * @param {number} x 
+ */
+const logb = (base, x) => {
+    return Math.log(x) / Math.log(base);
+}
+
+export default function App(){
     const [files, setFiles] = useState([]);
     const [clips, setClips] = useState([]); // list of Clips (instances of the class defined above)
     const [globSpeedDisplay, setGlobSpeedDisplay] = useState(1);
@@ -60,14 +78,58 @@ export default function App({ wasm }){
                 left: 0,
                 top: 0,
                 color: '#eee',
-                paddingLeft: 10
+                paddingLeft: 10,
+                paddingTop: 10
             }}
         >
-            <p>
-                Drag an mp3 or wav file into the magenta file drop box.<br/>
-                Then, draw a timeplot by clicking in the green box. Press backspace to undo.<br/>
-                Finally click the Realise button that will appear below!
-            </p>
+<label htmlFor="globalVolumeSlider">Master Volume: </label>
+            <input
+                id="globalVolumeSlider"
+                type="range"
+                defaultValue={80}
+                onChange={e => {
+                    if(!audioCtx){
+                        initAudioCtx();
+                    }
+
+                    // use exponential scale to go from 0,0 to 1,1 so the volume slider feels more natural
+                    const tension = 10; // how extreme the curve is (higher = more extreme, slower start faster end)
+                    const n = 1 / (1 - logb(1 / tension, 1 + (1 / tension)));
+                    
+                    const val = Math.pow(1 / tension, 1 - (e.target.value / 100) / n) - 1 / tension;
+                    console.log(val);
+                    masterGainNode.gain.value = val;
+                }}
+                style={{
+                    display: 'inline-block',
+                    verticalAlign: 'middle'
+                }}
+            />
+            <br/>
+            <label htmlFor="globalSpeedSlider">Playback Rate: </label>
+            <input
+                id="globalSpeedSlider"
+                type="range"
+                onChange={e => {
+                    if(!audioCtx){
+                        initAudioCtx();
+                    }
+
+                    let val = Math.pow(1/10, (1 - e.target.value * 2 / 100));
+                    
+                    setGlobSpeedDisplay(val);
+                    globalSpeed = val;
+                    
+                    for(let abn of audioBufferNodes){
+                        abn.playbackRate.value = val;
+                    }
+                }}
+                style={{
+                    display: 'inline-block',
+                    verticalAlign: 'middle'
+                }}
+            />
+            <span htmlFor="globalSpeedSlider">{globSpeedDisplay.toFixed(2)}</span><br/>
 
             {/* <button onClick={() => console.log(clips)}>log clips</button> */}
             {/* <button onClick={() => console.log(timeplot.points)}>log points</button> */}
@@ -93,27 +155,6 @@ export default function App({ wasm }){
                 
                 <ClipList clips={clips} setClips={setClips} />
             </div>
-
-            <label htmlFor="globalSpeedSlider">Playback Rate: </label>
-            <input
-                id="globalSpeedSlider"
-                type="range"
-                onChange={e => {
-                    let val = Math.pow(1/100, (1 - e.target.value * 2 / 100));
-                    
-                    setGlobSpeedDisplay(val);
-                    globalSpeed = val;
-                    
-                    for(let abn of audioBufferNodes){
-                        abn.playbackRate.value = val;
-                    }
-                }}
-                style={{
-                    display: 'inline-block',
-                    verticalAlign: 'middle'
-                }}
-            />
-            <label htmlFor="globalSpeedSlider">{globSpeedDisplay.toFixed(2)}</label>
         </div>
     );
 }
