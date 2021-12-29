@@ -1,4 +1,4 @@
-import { timeplot, AudioContext, audioBufferNodes } from "../App.jsx";
+import { timeplot, AudioContext, audioBufferNodes, globalSpeed } from "../App.jsx";
 import { TimePlot } from '../../build/realisr_2';
 import { memory } from '../../build/realisr_2_bg.wasm';
 
@@ -61,6 +61,22 @@ export class Clip {
         if(this.outAudioBuffer){
             source.buffer = this.outAudioBuffer;
             source.connect(audioCtx.destination);
+            source.playbackRate.value = globalSpeed;
+            audioBufferNodes.push(source);
+            source.start();
+        }
+    }
+
+    playOriginal(){
+        if(!audioCtx){
+            audioCtx = new AudioContext();
+        }
+
+        let source = audioCtx.createBufferSource();
+        if(this.inAudioBuffer){
+            source.buffer = this.inAudioBuffer;
+            source.connect(audioCtx.destination);
+            source.playbackRate.value = globalSpeed;
             audioBufferNodes.push(source);
             source.start();
         }

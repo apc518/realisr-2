@@ -12,6 +12,8 @@ export const canvasWidth = 500;
 export const canvasHeight = 500;
 export const globalButtonsWidth = 180;
 
+export let globalSpeed = 1;
+
 let audioCtx;
 
 export const timeplot = {
@@ -28,6 +30,7 @@ export const audioBufferNodes = [];
 export default function App({ wasm }){
     const [files, setFiles] = useState([]);
     const [clips, setClips] = useState([]); // list of Clips (instances of the class defined above)
+    const [globSpeedDisplay, setGlobSpeedDisplay] = useState(1);
     
     useEffect(() => {
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -90,6 +93,27 @@ export default function App({ wasm }){
                 
                 <ClipList clips={clips} setClips={setClips} />
             </div>
+
+            <label htmlFor="globalSpeedSlider">Playback Rate: </label>
+            <input
+                id="globalSpeedSlider"
+                type="range"
+                onChange={e => {
+                    let val = Math.pow(1/100, (1 - e.target.value * 2 / 100));
+                    
+                    setGlobSpeedDisplay(val);
+                    globalSpeed = val;
+                    
+                    for(let abn of audioBufferNodes){
+                        abn.playbackRate.value = val;
+                    }
+                }}
+                style={{
+                    display: 'inline-block',
+                    verticalAlign: 'middle'
+                }}
+            />
+            <label htmlFor="globalSpeedSlider">{globSpeedDisplay.toFixed(2)}</label>
         </div>
     );
 }
