@@ -35,7 +35,6 @@ export default function ClipList({ clips, setClips }){
                     }}
                 >
                     <div
-                        src="/assets/close-red-64.png"
                         style={{
                             width: 16,
                             height: 16,
@@ -51,7 +50,7 @@ export default function ClipList({ clips, setClips }){
                             setClips([...clips]);
                         }}
                     >
-                        <img style={{ maxWidth: '60%' }} src="/assets/close-red-64.png" alt="red x icon" />
+                        <svg style={{ color: '#f44' }} fill="currentColor" focusable="false" viewBox="0 0 24 24" aria-hidden="true" data-testid="CloseIcon" aria-label="fontSize medium"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
                     </div>
                     {clip.name}<br/>
                     <button

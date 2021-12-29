@@ -144,10 +144,12 @@ export default function App(){
 
             <footer style={{
                 marginTop: 'auto',
-                height: '2rem',
-                color: "#666"
+                height: '3.5rem',
+                color: "#888",
+                lineHeight: '1.5rem'
             }}>
-            <div>Close icon made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+            <div>Site by <a class="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
+            <div><a class="footerLink" target="_blank" rel="noreferrer" href="https://github.com/apc518/realisr-2" title="Realisr 2 Github">GitHub</a></div>
             </footer>
         </div>
     );
