@@ -5,6 +5,8 @@ import { cloneDeep } from "lodash";
 
 import { canvasWidth, canvasHeight, timeplot, timeplotDefault } from "../App.jsx";
 
+import { resetClipsOutputs } from "./ClipList.jsx";
+
 export const fitTimeplotToCanvas = (scaleUp=false) => {
     let oneIsOut = false; // whether at least one point is outside the canvas border
 
@@ -36,7 +38,7 @@ export const invalidTimeplotFile = (filename, details) => {
     });
 }
 
-export const loadTimeplotObj = (newTimeplot, name, resetClipsOutputs) => {
+export const loadTimeplotObj = (newTimeplot, name) => {
     try{
         // try to read and confirm type of points field
         if(!("points" in newTimeplot)){
@@ -95,7 +97,7 @@ const lineColors = ['#0099dc', '#fc4f30', '#e5ae38', '#6db04f', '#bbb', '#c12fac
 
 let canvas;
 
-export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
+export default function TimeplotEditor({ lightGrayUI }){
     const sketchBgColorDefault = lightGrayUI;
     const sketchBgColorOnDragover = "#111";
     let sketchBgColor = sketchBgColorDefault;
@@ -104,7 +106,7 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
         const gotFile = f => {
             if(f.subtype === 'json'){
                 const newTimeplot = f.data;
-                loadTimeplotObj(newTimeplot, f.name, resetClipsOutputs);
+                loadTimeplotObj(newTimeplot, f.name);
             }
             else{
                 invalidTimeplotFile(f.name, "Not a json file");
@@ -167,7 +169,7 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
                 
                 // only delete the point if the backspace button has been held for enough time
                 // also only delete every other frame
-                if(backspaceHoldCountdown === 0 && p5.frameCount % 2 == 0){
+                if(backspaceHoldCountdown === 0){
                     tryDeletePoint();
                 }
             }

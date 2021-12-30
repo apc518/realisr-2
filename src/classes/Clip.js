@@ -1,6 +1,8 @@
-import { timeplot, audioBufferNodes, globalSpeed, audioCtx, initAudioCtx, globalVolume, gainNodes } from "../App.jsx";
+import { timeplot, globalSpeed, audioCtx, initAudioCtx, globalVolume } from "../App.jsx";
 import { TimePlot } from '../../build/realisr_2';
 import { memory } from '../../build/realisr_2_bg.wasm';
+
+import { clipsEx, setClipsEx } from "../components/ClipList.jsx";
 
 export class Clip {
     constructor(audioBuffer, name){
@@ -16,11 +18,16 @@ export class Clip {
         // playing
         this.inAudioBufferNode = null;
         this.outAudioBufferNode = null;
-        this.gainNode = null;
+        this.inGainNode = null;
+        this.outGainNode = null;
+        this.playingOut = false;
+        this.playingOriginal = false;
+        this.onOutEnded = () => {}
+        this.onInEnded = () => {}
     }
 
     realise(){
-        // compute timeplot.points for each channel
+        // compute output audio data for each channel
         let rustBuffers = [];
         for(let i = 0; i < this.inAudioBuffer.numberOfChannels; i++){
             // input our data into rust
@@ -66,15 +73,25 @@ export class Clip {
         if(this.outAudioBuffer){
             source.buffer = this.outAudioBuffer;
             source.playbackRate.value = globalSpeed;
+            source.onended = () => {
+                this.playingOut = false
+                setClipsEx([...clipsEx]);
+            };
+
             source.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            audioBufferNodes.push(source);
-            gainNodes.push(gainNode);
+            
+            this.outAudioBufferNode = source;
+            this.outGainNode = gainNode;
+
             source.start();
+            this.playingOut = true;
         }
     }
 
     playOriginal(){
+        this.playingOriginal = true;
+
         if(!audioCtx){
             initAudioCtx();
         }
@@ -85,29 +102,54 @@ export class Clip {
         if(this.inAudioBuffer){
             source.buffer = this.inAudioBuffer;
             source.playbackRate.value = globalSpeed;
+            source.onended = () => { 
+                this.playingOriginal = false;
+                setClipsEx([...clipsEx]);
+            };
+
             source.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            audioBufferNodes.push(source);
-            gainNodes.push(gainNode);
+
+            this.inAudioBufferNode = source;
+            this.inGainNode = gainNode;
+
             source.start();
         }
     }
 
-    onended = null; // event handler for ended
-
     stopOut(){
-        this.outAudioBufferNode.stop();
+        this.outAudioBufferNode?.stop();
         this.outAudioBufferNode = null;
+        this.playingOut = false;
     }
 
     stopOriginal(){
-        this.inAudioBufferNode.stop();
+        this.inAudioBufferNode?.stop();
         this.inAudioBufferNode = null;
+        this.playingOriginal = false;
     }
 
     stop(){
         this.stopOut();
         this.stopOriginal();
+    }
+
+    setVolume(v){
+        if(this.outGainNode){
+            this.outGainNode.gain.value = v;
+        }
+        if(this.inGainNode){
+            this.inGainNode.gain.value = v;
+        }
+    }
+
+    setPlaybackRate(s){
+        if(this.outAudioBufferNode){
+            this.outAudioBufferNode.playbackRate.value = s;
+        }
+        if(this.inAudioBufferNode){
+            this.inAudioBufferNode.playbackRate.value = s;
+        }
     }
 
     generateDownload(){

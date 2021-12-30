@@ -1,16 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
-import { initAudioCtx, lightGrayUI, timeplot } from '../App.jsx';
+import { audioCtx, initAudioCtx, lightGrayUI, timeplot } from '../App.jsx';
 
-let audioCtx;
+export let setClipsEx;
+export let clipsEx = [];
 
 const linkColorAtRest = "#0ff";
 
-export default function ClipList({ clips, setClips }){
+export const resetClipsOutputs = () => {
+    let changed = false;
+    for (let c of clipsEx) {
+        if(!(c.blob === null && c.outAudioBuffer === null && c.isRealised === false)){
+            c.blob = null;
+            c.outAudioBuffer = null;
+            c.isRealised = false;
+
+            changed = true;
+        }
+    }
+    if(changed){
+        setClipsEx([...clipsEx]); // refresh clip list
+    }
+}
+
+export default function ClipList({ clipsMessage }){
     const [linkColor, setLinkColor] = useState(linkColorAtRest);
+    const [clips, setClips] = useState([]); // don't use setClips directly, use setClipsEx instead
+
+    useEffect(() => {
+        setClipsEx = (x) => {
+            clipsEx = x;
+            setClips(x);
+        };
+        clipsEx = clips;
+    }, []);
 
     return (
+        <>
+        {clips.length === 0 ?
+        <div style={{ paddingLeft: 10 }}>{clipsMessage}</div>
+        : 
         <div style={{
             display: 'grid',
             gap: 10,
@@ -47,8 +77,10 @@ export default function ClipList({ clips, setClips }){
                         }}
                         className="closeButton"
                         onClick={() => {
+                            clip.stop();
                             clips.splice(idx, 1);
-                            setClips([...clips]);
+                            console.log(clip, clips);
+                            setClipsEx([...clips]);
                         }}
                     >
                         <svg style={{ color: '#d44' }} fill="currentColor" focusable="false" viewBox="0 0 24 24" aria-hidden="true" data-testid="CloseIcon" aria-label="fontSize medium"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
@@ -58,6 +90,12 @@ export default function ClipList({ clips, setClips }){
                         onClick={() => {
                             if(!audioCtx){
                                 initAudioCtx();
+                            }
+
+                            if(clip.playingOut){
+                                clip.stopOut();
+                                setClipsEx([...clips]);
+                                return;
                             }
 
                             if (timeplot.points.length < 2){
@@ -84,18 +122,18 @@ export default function ClipList({ clips, setClips }){
                                         clip.realise();
                                         console.timeEnd("realising");
                                         clip.play();
-                                        setClips([...clips]);
+                                        setClipsEx([...clips]);
                                     });
                                 }
                                 else{
                                     clip.play();
-                                    setClips([...clips]);
+                                    setClipsEx([...clips]);
                                 }
                             }
 
                         }}
                     >
-                        {clip.isRealised ? "Play" : "Realise"}
+                        {clip.isRealised ? (clip.playingOut ? "Stop" : "Play") : "Realise"}
                     </button>
                     <button
                         onClick={() => {
@@ -103,10 +141,17 @@ export default function ClipList({ clips, setClips }){
                                 initAudioCtx();
                             }
 
-                            clip.playOriginal();
+                            if(clip.playingOriginal){
+                                clip.stopOriginal();
+                                setClipsEx([...clips]);
+                            }
+                            else{
+                                clip.playOriginal();
+                                setClipsEx([...clips]);
+                            }
                         }}
                     >
-                        Play Original
+                        {clip.playingOriginal ? "Stop" : "Play"} Original
                     </button>
                     <br/>
                     {
@@ -127,7 +172,7 @@ export default function ClipList({ clips, setClips }){
                         : <button
                             onClick={() => { 
                                 clip.generateDownload();
-                                setClips([...clips]);
+                                setClipsEx([...clips]);
                             }}
                             disabled={!clip.isRealised}
                         >Generate Download</button>
@@ -135,5 +180,7 @@ export default function ClipList({ clips, setClips }){
                 </div>
             ))}
         </div>
+        }
+        </>
     )
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { audioCtx, initAudioCtx, audioBufferNodes, setGlobalSpeed } from "../App.jsx";
+import { audioCtx, initAudioCtx, setGlobalSpeed } from "../App.jsx";
+import { clipsEx } from "./ClipList.jsx";
 
 export default function PlaybackRateControl(){
     const [globSpeedDisplay, setGlobSpeedDisplay] = useState(1);
@@ -21,8 +22,8 @@ export default function PlaybackRateControl(){
                     setGlobSpeedDisplay(val);
                     setGlobalSpeed(val);
                     
-                    for(let abn of audioBufferNodes){
-                        abn.playbackRate.value = val;
+                    for(let clip of clipsEx){
+                        clip.setPlaybackRate(val);
                     }
                 }}
                 style={{

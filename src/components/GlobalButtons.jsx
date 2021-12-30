@@ -7,15 +7,16 @@ import SaveIcon from '@mui/icons-material/Save';
 import UploadIcon from '@mui/icons-material/Upload';
 import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
 
-import { timeplot, globalButtonsWidth, audioBufferNodes } from "../App.jsx";
+import { timeplot, globalButtonsWidth } from "../App.jsx";
 import { fitTimeplotToCanvas, loadTimeplotObj, p5sketch } from "./TimeplotCanvas.jsx";
+import { clipsEx, resetClipsOutputs } from "./ClipList.jsx";
 
 let minSegmentsInRandomWalk = 1;
 let maxSegmentsInRandomWalk = 24;
 
 const iconOffset = 40;
 
-export default function GlobalButtons({ resetClipsOutputs }) {
+export default function GlobalButtons() {
     const [showRandomWalkSettings, setShowRandomWalkSettings] = useState(false);
 
     return (
@@ -28,10 +29,9 @@ export default function GlobalButtons({ resetClipsOutputs }) {
             {/* Stop all audio */}
             <button 
                 onClick={() => {
-                    for(let x of audioBufferNodes){
+                    for(let x of clipsEx){
                         x.stop();
                     }
-                    audioBufferNodes.splice(0, audioBufferNodes.length);
                 }}
                 className="globalBtn"
             >
@@ -129,7 +129,7 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                             f.text().then(res => {
                                 try{
                                     const newTimeplot = JSON.parse(res);
-                                    loadTimeplotObj(newTimeplot, f.name, resetClipsOutputs);
+                                    loadTimeplotObj(newTimeplot, f.name);
                                 }
                                 catch(e){
                                     Swal.fire({
