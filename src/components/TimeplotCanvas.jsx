@@ -173,7 +173,7 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
                     p5.textAlign(p5.CENTER);
                     p5.textFont("Trebuchet MS");
                     p5.textSize(20);
-                    p5.fill("#aaa");
+                    p5.fill("#bbb");
                     p5.text("Start drawing or drag and drop a timeplot file!\nRight click to draw segments one at a time,\nor left click and hold to freehand.\nUse backspace to delete segments.", 0, -20);
                 }
                 

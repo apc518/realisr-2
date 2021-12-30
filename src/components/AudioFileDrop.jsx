@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 
-import { canvasWidth, globalButtonsWidth, audioCtx, initAudioCtx, lightTextColor } from '../App.jsx';
+import { canvasWidth, globalButtonsWidth, audioCtx, initAudioCtx, lightTextColor, clipsMessageDefault, clipsMessageLoading } from '../App.jsx';
 
 import { Clip } from "../classes/Clip.js";
 
 const inactiveColor = "#d0d";
 const activeColor = "#d77";
 
-export default function AudioAudioFileDrop({ clips, setClips }){
+export default function AudioAudioFileDrop({ clips, setClips, setClipsMessage }){
     const [bgColor, setBgColor] = useState(inactiveColor);
 
     const loadFiles = fileList => {
+        setClipsMessage(clipsMessageLoading);
+
         if(!audioCtx){
             initAudioCtx();
         }
@@ -30,6 +32,7 @@ export default function AudioAudioFileDrop({ clips, setClips }){
         const trySetClips = () => {
             if(i === files.length - 1){
                 setClips(newClips);
+                setClipsMessage(clipsMessageDefault);
 
                 if(failedFilenames.length > 0){
                     Swal.fire({

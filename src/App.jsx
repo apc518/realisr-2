@@ -44,6 +44,9 @@ export const timeplot = cloneDeep(timeplotDefault);
 
 export const audioBufferNodes = [];
 
+export const clipsMessageDefault = "No clips loaded.";
+export const clipsMessageLoading = "Loading clips...";
+
 /**
  * returns the logarithm of x with in the input base
  * @param {number} base 
@@ -56,6 +59,7 @@ const logb = (base, x) => {
 export default function App(){
     const [files, setFiles] = useState([]);
     const [clips, setClips] = useState([]); // list of Clips (instances of the class defined above)
+    const [clipsMessage, setClipsMessage] = useState(clipsMessageDefault);
     
     useEffect(() => {
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -133,6 +137,7 @@ export default function App(){
                             audioCtx={audioCtx}
                             clips={clips}
                             setClips={setClips}
+                            setClipsMessage={setClipsMessage}
                         />
 
                         <GlobalButtons clips={clips} setClips={setClips} resetClipsOutputs={resetClipsOutputs} />
@@ -141,7 +146,11 @@ export default function App(){
                     <TimeplotCanvas resetClipsOutputs={resetClipsOutputs} lightGrayUI={lightGrayUI} />
                 </div>
                 
-                <ClipList clips={clips} setClips={setClips} />
+                {clips.length > 0 ?
+                    <ClipList clips={clips} setClips={setClips} />
+                    :
+                    <div style={{ paddingLeft: 10 }}>{clipsMessage}</div>
+                }
             </div>
 
             <footer style={{
@@ -150,7 +159,7 @@ export default function App(){
                 color: "#888",
                 lineHeight: '1.5rem'
             }}>
-            <div>Site by <a className="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
+            <div>Copyright &copy; 2022 <a className="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
             <div><a className="footerLink" target="_blank" rel="noreferrer" href="https://github.com/apc518/realisr-2" title="Realisr 2 Github">GitHub</a></div>
             </footer>
         </div>
