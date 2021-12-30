@@ -16,10 +16,13 @@ export const globalButtonsWidth = 180;
 export const lightTextColor = "#eee";
 export const lightGrayUI = "#444";
 
+export const audioBufferNodes = [];
+export const gainNodes = [];
+
 export let audioCtx;
-export let masterGainNode;
 
 export const globalVolumeDefault = 0.5264; // this is 80% on the slider
+export let globalVolume = globalVolumeDefault;
 export let globalSpeed = 1;
 
 export const setGlobalSpeed = s => {
@@ -28,9 +31,6 @@ export const setGlobalSpeed = s => {
 
 export const initAudioCtx = () => {
     audioCtx = new AudioContext();
-    masterGainNode = audioCtx.createGain();
-    masterGainNode.gain.value = globalVolumeDefault;
-    masterGainNode.connect(audioCtx.destination);
 }
 
 export const timeplotDefault = Object.freeze({
@@ -41,8 +41,6 @@ export const timeplotDefault = Object.freeze({
 });
 
 export const timeplot = cloneDeep(timeplotDefault);
-
-export const audioBufferNodes = [];
 
 export const clipsMessageDefault = "No clips loaded.";
 export const clipsMessageLoading = "Loading clips...";
@@ -108,12 +106,14 @@ export default function App(){
                             initAudioCtx();
                         }
 
-                        // use exponential scale to go from 0,0 to 1,1 so the volume slider feels more natural
+                        // use exponential scale to go from 0 to 1 so the volume slider feels more natural
                         const tension = 10; // how extreme the curve is (higher = more extreme, slower start faster end)
                         const n = 1 / (1 - logb(1 / tension, 1 + (1 / tension)));
                         
                         const val = Math.pow(1 / tension, 1 - (e.target.value / 100) / n) - 1 / tension;
-                        masterGainNode.gain.value = val;
+                        for(let gn of gainNodes){
+                            gn.gain.value = val;
+                        }
                     }}
                     style={{
                         display: 'inline-block',
