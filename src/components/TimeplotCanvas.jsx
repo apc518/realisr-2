@@ -5,19 +5,27 @@ import { cloneDeep } from "lodash";
 
 import { canvasWidth, canvasHeight, timeplot, timeplotDefault } from "../App.jsx";
 
-export const fitTimeplotToCanvas = () => {
+export const fitTimeplotToCanvas = (scaleUp=false) => {
+    let oneIsOut = false; // whether at least one point is outside the canvas border
+
     let maxDistance = -1;
     for(let point of timeplot.points) {
+        if(point.x > canvasWidth/2 || point.y > canvasHeight/2 || point.x < -canvasWidth/2 || point.y < -canvasHeight/2){
+            oneIsOut = true;
+        }
         if(Math.sqrt(point.x * point.x + point.y * point.y) > maxDistance) {
             maxDistance = Math.sqrt(point.x * point.x + point.y * point.y);
         }
     }
+
+    if(!oneIsOut && !scaleUp) return;
     
     // rescale all points so the farthest one out is just inside the border
     let ratio = (canvasWidth / 2 - 10) / maxDistance;
     for(let point of timeplot.points){
-        point.x *= ratio;
-        point.y *= ratio;
+        point.x = Math.round(point.x * ratio);
+        point.y = Math.round(point.y * ratio);
+        
     }
 }
 
@@ -69,14 +77,18 @@ export const loadTimeplotObj = (newTimeplot, name, resetClipsOutputs) => {
             }
         }
         
-        fitTimeplotToCanvas();
         
+        fitTimeplotToCanvas();
         resetClipsOutputs();
+
+        p5sketch.draw();
     }
     catch(e){
         invalidTimeplotFile(name, e.message);
     }
 }
+
+export let p5sketch;
 
 // matplotlib default colors, omage to Realisr 1
 const lineColors = ['#0099dc', '#fc4f30', '#e5ae38', '#6db04f', '#bbb', '#c12fac'];
@@ -135,6 +147,7 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
             canvas.drop(gotFile);
             canvas.dragOver(onDragOver);
             canvas.dragLeave(onDragLeave);
+            p5sketch = p5;
         };
     
         p5.draw = () => {

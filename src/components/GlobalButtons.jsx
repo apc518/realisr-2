@@ -8,7 +8,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
 
 import { timeplot, globalButtonsWidth, audioBufferNodes } from "../App.jsx";
-import { fitTimeplotToCanvas, loadTimeplotObj } from "./TimeplotCanvas.jsx";
+import { fitTimeplotToCanvas, loadTimeplotObj, p5sketch } from "./TimeplotCanvas.jsx";
 
 let minSegmentsInRandomWalk = 1;
 let maxSegmentsInRandomWalk = 24;
@@ -47,6 +47,12 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                 onClick={() => {
                     timeplot.points.splice(0, timeplot.points.length);
                     resetClipsOutputs();
+                    try{
+                        p5sketch.draw();
+                    }
+                    catch{
+                        console.log("The clear timeplot button was pressed before the drawing canvas was initialized.");
+                    }
                 }}
                 className="globalBtn"
             >
@@ -161,9 +167,9 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                         timeplot.points.push({x: timeplot.points[i-1].x + dx, y: timeplot.points[i-1].y + dy});
                     }
                     
-                    fitTimeplotToCanvas();                    
-
+                    fitTimeplotToCanvas(true);                    
                     resetClipsOutputs();
+                    p5sketch.draw();
                 }}
                 className="globalBtn"
             >
