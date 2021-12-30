@@ -111,14 +111,17 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
             }
             
             sketchBgColor = sketchBgColorDefault;
+            p5.draw();
         }
 
         const onDragOver = () => {
             sketchBgColor = sketchBgColorOnDragover;
+            p5.draw();
         }
 
         const onDragLeave = () => {
             sketchBgColor = sketchBgColorDefault;
+            p5.draw();
         }
 
         const tryPlacePoint = (x, y) => {
