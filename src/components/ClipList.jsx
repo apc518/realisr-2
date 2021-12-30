@@ -85,7 +85,19 @@ export default function ClipList({ clips, setClips }){
                         }}
                     >
                         {clip.isRealised ? "Play" : "Realise"}
-                    </button><br/>
+                    </button>
+                    <button
+                        onClick={() => {
+                            if(!audioCtx){
+                                initAudioCtx();
+                            }
+
+                            clip.playOriginal();
+                        }}
+                    >
+                        Play Original
+                    </button>
+                    <br/>
                     {
                         (clip.blob && clip.isRealised) ? 
                             <a 
