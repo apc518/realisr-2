@@ -31,7 +31,8 @@ export default function ClipList({ clips, setClips }){
                         padding: 5,
                         maxWidth: 200,
                         wordWrap: 'break-word',
-                        borderRadius: 10
+                        borderRadius: 10,
+                        userSelect: 'none'
                     }}
                 >
                     <div
@@ -83,7 +84,7 @@ export default function ClipList({ clips, setClips }){
                             setClips([...clips]);
                         }}
                     >
-                        Realise
+                        {clip.isRealised ? "Play" : "Realise"}
                     </button><br/>
                     {
                         (clip.blob && clip.isRealised) ? 
