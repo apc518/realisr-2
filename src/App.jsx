@@ -111,6 +111,7 @@ export default function App(){
                         const n = 1 / (1 - logb(1 / tension, 1 + (1 / tension)));
                         
                         const val = Math.pow(1 / tension, 1 - (e.target.value / 100) / n) - 1 / tension;
+                        globalVolume = val;
                         for(let gn of gainNodes){
                             gn.gain.value = val;
                         }
