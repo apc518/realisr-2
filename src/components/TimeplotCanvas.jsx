@@ -125,7 +125,9 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
 
         const arrowheadSize = 8;
 
-        const backspaceHoldTime = 30; // approximately half a second
+        const drawingFramerate = 30;
+        const restingFramerate = 1;
+        const backspaceHoldTime = drawingFramerate / 2; // approximately half a second
         let backspaceHoldCountdown = backspaceHoldTime;
 
         p5.setup = () => {
@@ -209,14 +211,24 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
         }
 
         p5.mousePressed = () => {
+            p5.frameRate(drawingFramerate);
             tryPlacePoint(p5.mouseX, p5.mouseY);
-            if(p5.mouseButton === p5.RIGHT){
-            }
+        }
+
+        p5.mouseReleased = () => {
+            p5.frameRate(restingFramerate);
         }
     
         p5.keyPressed = e => {
             if(e.key === "Backspace"){
+                p5.frameRate(drawingFramerate);
                 tryDeletePoint();
+            }
+        }
+
+        p5.keyReleased = e => {
+            if(e.key === "Backspace"){
+                p5.frameRate(restingFramerate);
             }
         }
     }
