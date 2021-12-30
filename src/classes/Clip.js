@@ -12,6 +12,11 @@ export class Clip {
         this.outAudioBuffer = null;
         this.isRealised = false;
         this.blob = null;
+
+        // playing
+        this.inAudioBufferNode = null;
+        this.outAudioBufferNode = null;
+        this.gainNode = null;
     }
 
     realise(){
@@ -86,6 +91,23 @@ export class Clip {
             gainNodes.push(gainNode);
             source.start();
         }
+    }
+
+    onended = null; // event handler for ended
+
+    stopOut(){
+        this.outAudioBufferNode.stop();
+        this.outAudioBufferNode = null;
+    }
+
+    stopOriginal(){
+        this.inAudioBufferNode.stop();
+        this.inAudioBufferNode = null;
+    }
+
+    stop(){
+        this.stopOut();
+        this.stopOriginal();
     }
 
     generateDownload(){

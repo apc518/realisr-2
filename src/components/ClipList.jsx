@@ -74,14 +74,25 @@ export default function ClipList({ clips, setClips }){
                             }
                             else{
                                 if(!clip.isRealised) {
-                                    console.time("realising");
-                                    clip.realise();
-                                    console.timeEnd("realising");
+                                    Swal.fire({
+                                        icon: 'info',
+                                        text: `Realising ${clip.name}...`,
+                                        showConfirmButton: false,
+                                        timer: 100
+                                    }).then(() => {
+                                        console.time("realising");
+                                        clip.realise();
+                                        console.timeEnd("realising");
+                                        clip.play();
+                                        setClips([...clips]);
+                                    });
                                 }
-                                clip.play();
+                                else{
+                                    clip.play();
+                                    setClips([...clips]);
+                                }
                             }
 
-                            setClips([...clips]);
                         }}
                     >
                         {clip.isRealised ? "Play" : "Realise"}
