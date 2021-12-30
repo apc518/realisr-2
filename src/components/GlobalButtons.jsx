@@ -1,16 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
 
-import { timeplot, globalButtonsWidth, audioBufferNodes, canvasWidth } from "../App.jsx";
+import StopIcon from '@mui/icons-material/Stop';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import SaveIcon from '@mui/icons-material/Save';
+import UploadIcon from '@mui/icons-material/Upload';
+import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
+
+import { timeplot, globalButtonsWidth, audioBufferNodes } from "../App.jsx";
 import { fitTimeplotToCanvas, loadTimeplotObj } from "./TimeplotCanvas.jsx";
 
+let minSegmentsInRandomWalk = 1;
+let maxSegmentsInRandomWalk = 24;
+
+const iconOffset = 40;
+
 export default function GlobalButtons({ resetClipsOutputs }) {
+    const [showRandomWalkSettings, setShowRandomWalkSettings] = useState(false);
+
     return (
+        <>
         <div style={{
             display: 'grid',
             placeItems: "center",
             width: globalButtonsWidth
         }}>
+            {/* Stop all audio */}
             <button 
                 onClick={() => {
                     for(let x of audioBufferNodes){
@@ -19,16 +34,30 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                     audioBufferNodes.splice(0, audioBufferNodes.length);
                 }}
                 className="globalBtn"
-            >Stop all audio</button>
+            >
+                <div style={{ minWidth: iconOffset / 2 }} />
+                <span style={{ flexGrow: 1 }}>
+                    Stop all audio
+                </span>
+                <StopIcon  style={{ minWidth: iconOffset }} />
+            </button>
 
+            {/* Clear timeplot */}
             <button 
                 onClick={() => {
-                    timeplot.points.splice(1, timeplot.points.length - 1);
+                    timeplot.points.splice(0, timeplot.points.length);
                     resetClipsOutputs();
                 }}
                 className="globalBtn"
-            >Clear timeplot</button>
+            >
+                <div style={{ minWidth: iconOffset / 2 }} />
+                <span style={{ flexGrow: 1 }}>
+                    Clear timeplot
+                </span>
+                <ClearAllIcon style={{ minWidth: iconOffset }} />
+            </button>
 
+            {/* Save timeplot */}
             <button 
                 onClick={() => {
                     if(timeplot.points.length < 2){
@@ -70,8 +99,15 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                     })
                 }}
                 className="globalBtn"
-            >Save timeplot as</button>
+            >
+                <div style={{ minWidth: iconOffset / 2 }} />
+                <span style={{ flexGrow: 1 }}>
+                    Save timeplot as
+                </span>
+                <SaveIcon style={{ minWidth: iconOffset }} />
+            </button>
 
+            {/* Load timeplot */}
             <button 
                 onClick={() => {
                     const fileInput = document.createElement('input');
@@ -103,12 +139,19 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                 }}
 
                 className="globalBtn"
-            >Load timeplot</button>
+            >
+                <div style={{ minWidth: iconOffset / 2 }} />
+                <span style={{ flexGrow: 1 }}>
+                    Load timeplot
+                </span>
+                <UploadIcon style={{ minWidth: iconOffset }} />
+            </button>
 
+            {/* Random Walk */}
             <button
                 onClick={() => {
                     timeplot.points = [{x: 0, y: 0}];
-                    let numberOfSegments = Math.round(Math.random() * 24 + 1);
+                    let numberOfSegments = Math.round(Math.random() * (maxSegmentsInRandomWalk - minSegmentsInRandomWalk) + minSegmentsInRandomWalk);
                     for(let i = 1; i <= numberOfSegments; i++){
                         let theta_min = 0;
                         let theta_max = 360 * Math.PI / 180;
@@ -122,10 +165,56 @@ export default function GlobalButtons({ resetClipsOutputs }) {
 
                     resetClipsOutputs();
                 }}
-            className="globalBtn"
+                className="globalBtn"
             >
-                Random Walk
+                <div style={{ minWidth: iconOffset / 2 }} />
+                <span style={{ flexGrow: 1 }}>
+                    Random Walk
+                </span>
+                <TransferWithinAStationIcon style={{ minWidth: iconOffset }} />
             </button>
         </div>
+        
+        {/* modal for random walk settings */}
+        {showRandomWalkSettings ?
+        <>
+            <div 
+                style={{
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: "#000",
+                    opacity: 0.5,
+                    pointerEvents: 'none',
+                    zIndex: 99
+                }}
+                onClick={e => {
+                    e.preventDefault();
+                    e.stopImmediatePropogation();
+                    e.stopPropagation();
+                    return false;
+                }}
+            >
+            </div>
+            <div style={{
+                position: "fixed",
+                zIndex: 100,
+                transform: 'translate(-50%, -50%)',
+                left: '50vw',
+                top: '50vh',
+                width: 600,
+                height: 600,
+                background: "#0f0"
+            }}>
+                <button onClick={() => setShowRandomWalkSettings(false)}>Okay</button>
+            </div>
+        </>
+        : <></>}
+        
+        </>
+
+
     )
 }
