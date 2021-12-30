@@ -5,6 +5,22 @@ import { cloneDeep } from "lodash";
 
 import { canvasWidth, canvasHeight, timeplot, timeplotDefault } from "../App.jsx";
 
+export const fitTimeplotToCanvas = () => {
+    let maxDistance = -1;
+    for(let point of timeplot.points) {
+        if(Math.sqrt(point.x * point.x + point.y * point.y) > maxDistance) {
+            maxDistance = Math.sqrt(point.x * point.x + point.y * point.y);
+        }
+    }
+    
+    // rescale all points so the farthest one out is just inside the border
+    let ratio = (canvasWidth / 2 - 10) / maxDistance;
+    for(let point of timeplot.points){
+        point.x *= ratio;
+        point.y *= ratio;
+    }
+}
+
 export const invalidTimeplotFile = (filename, details) => {
     Swal.fire({
         icon: 'error',
@@ -53,6 +69,8 @@ export const loadTimeplotObj = (newTimeplot, name, resetClipsOutputs) => {
             }
         }
         
+        fitTimeplotToCanvas();
+        
         resetClipsOutputs();
     }
     catch(e){
@@ -91,6 +109,25 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
             sketchBgColor = sketchBgColorDefault;
         }
 
+        const tryPlacePoint = (x, y) => {
+            if (x < canvasWidth && x > 0 && y < canvasHeight && y > 0){
+                timeplot.points.push({ x: x - (canvasWidth / 2), y: - y + (canvasHeight / 2) });
+                resetClipsOutputs();
+            }
+        }
+
+        const tryDeletePoint = () => {
+            if (timeplot.points.length > 0) {
+                timeplot.points.splice(timeplot.points.length - 1, 1);
+                resetClipsOutputs();
+            }
+        }
+
+        const arrowheadSize = 8;
+
+        const backspaceHoldTime = 30; // approximately half a second
+        let backspaceHoldCountdown = backspaceHoldTime;
+
         p5.setup = () => {
             canvas = p5.createCanvas(canvasWidth, canvasHeight);
             canvas.drop(gotFile);
@@ -100,23 +137,50 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
     
         p5.draw = () => {
             p5.background(sketchBgColor);
-            p5.strokeWeight(2);
-            if(timeplot.points.length == 1){
-                p5.push();
-                p5.fill(lineColors[0]);
-                p5.noStroke();
-                p5.ellipse(canvasWidth / 2, canvasHeight / 2, 6);
-                p5.pop();
 
-                p5.textAlign(p5.CENTER);
-                p5.textFont("Trebuchet MS");
-                p5.textSize(20);
-                p5.fill("#aaa");
-                p5.text("Click to draw, or drag and drop a timeplot file", canvasWidth / 2, canvasHeight / 2 - 20);
-                p5.text("Press backspace to delete the last segment", canvasWidth / 2, canvasHeight / 2 + 35);
+            if(p5.mouseIsPressed){
+                if(p5.mouseButton === p5.LEFT && (p5.mouseX !== p5.pmouseX || p5.mouseY !== p5.pmouseY)){
+                    tryPlacePoint(p5.mouseX, p5.mouseY);
+                }
+            }
+
+            if(p5.keyIsDown(8)){
+                backspaceHoldCountdown = p5.max(0, backspaceHoldCountdown - 1);
+                
+                // only delete the point if the backspace button has been held for enough time
+                // also only delete every other frame
+                if(backspaceHoldCountdown === 0 && p5.frameCount % 2 == 0){
+                    tryDeletePoint();
+                }
+            }
+            else{
+                backspaceHoldCountdown = backspaceHoldTime;
+            }
+            
+            let colorCounter = 0;
+
+            // draw timeplot
+            p5.strokeWeight(2);
+            if(timeplot.points.length < 2){
+                p5.push();
+                p5.translate(canvasWidth / 2, canvasHeight / 2);
+                if(timeplot.points.length === 1){
+                    p5.fill(lineColors[0]);
+                    p5.noStroke();
+                    p5.ellipse(timeplot.points[0].x, -timeplot.points[0].y, 6);
+                }
+                else{
+                    p5.textAlign(p5.CENTER);
+                    p5.textFont("Trebuchet MS");
+                    p5.textSize(20);
+                    p5.fill("#aaa");
+                    p5.text("Start drawing or drag and drop a timeplot file!\nRight click to draw segments one at a time,\nor left click and hold to freehand.\nUse backspace to delete segments.", 0, -20);
+                }
+                
+                p5.pop();
             }
             for(let i = 1; i < timeplot.points.length; i++){
-                const color = lineColors[(i-1) % 6];
+                const color = lineColors[colorCounter % 6];
 
                 // line 
                 p5.push();
@@ -128,30 +192,31 @@ export default function TimeplotEditor({ resetClipsOutputs, lightGrayUI }){
                 p5.line(prevX, prevY, x, y);
     
                 // arrowhead
-                p5.noStroke();
-                p5.fill(color);
-                let angle = p5.atan2(prevY - y, prevX - x);
-                p5.translate(x, y);
-                p5.rotate(angle - p5.HALF_PI);
-                let triSize = 8;
-                p5.triangle(0, 0, -triSize/2, triSize, triSize/2, triSize);
+                // only draw the arrowhead if the length of the segment is longer than the arrowhead, or if its the last segment
+                if(Math.sqrt((x - prevX) * (x - prevX) + (y - prevY) * (y - prevY)) > arrowheadSize * 2 || i === timeplot.points.length - 1){
+                    p5.noStroke();
+                    p5.fill(color);
+                    let angle = p5.atan2(prevY - y, prevX - x);
+                    p5.translate(x, y);
+                    p5.rotate(angle - p5.HALF_PI);
+                    p5.triangle(0, 0, -arrowheadSize/2, arrowheadSize, arrowheadSize/2, arrowheadSize);
+
+                    colorCounter++;
+                }
+
                 p5.pop();
             }
         }
 
         p5.mousePressed = () => {
-            if (p5.mouseX < canvasWidth && p5.mouseX > 0 && p5.mouseY < canvasHeight && p5.mouseY > 0){
-                timeplot.points.push({ x: p5.mouseX - (canvasWidth / 2), y: - p5.mouseY + (canvasHeight / 2) });
-                resetClipsOutputs();
+            tryPlacePoint(p5.mouseX, p5.mouseY);
+            if(p5.mouseButton === p5.RIGHT){
             }
         }
     
         p5.keyPressed = e => {
             if(e.key === "Backspace"){
-                if (timeplot.points.length > 1) {
-                    timeplot.points.splice(timeplot.points.length - 1, 1);
-                    resetClipsOutputs();
-                }
+                tryDeletePoint();
             }
         }
     }

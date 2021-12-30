@@ -2,7 +2,7 @@ import React from "react";
 import Swal from "sweetalert2";
 
 import { timeplot, globalButtonsWidth, audioBufferNodes, canvasWidth } from "../App.jsx";
-import { loadTimeplotObj } from "./TimeplotCanvas.jsx";
+import { fitTimeplotToCanvas, loadTimeplotObj } from "./TimeplotCanvas.jsx";
 
 export default function GlobalButtons({ resetClipsOutputs }) {
     return (
@@ -113,25 +113,12 @@ export default function GlobalButtons({ resetClipsOutputs }) {
                         let theta_min = 0;
                         let theta_max = 360 * Math.PI / 180;
                         let theta = Math.random() * (theta_max - theta_min) + theta_min;
-                        let dx = 20 * Math.cos(theta);
-                        let dy = 20 * Math.sin(theta);
+                        let dx = Math.cos(theta);
+                        let dy = Math.sin(theta);
                         timeplot.points.push({x: timeplot.points[i-1].x + dx, y: timeplot.points[i-1].y + dy});
                     }
                     
-                    // find point farthest from center
-                    let maxDistance = -1;
-                    for(let point of timeplot.points) {
-                        if(Math.sqrt(point.x * point.x + point.y * point.y) > maxDistance) {
-                            maxDistance = Math.sqrt(point.x * point.x + point.y * point.y);
-                        }
-                    }
-                    
-                    // rescale all points so the farthest one out is 240 away from center
-                    let ratio = (canvasWidth / 2 - 10) / maxDistance;
-                    for(let point of timeplot.points){
-                        point.x *= ratio;
-                        point.y *= ratio;
-                    }
+                    fitTimeplotToCanvas();                    
 
                     resetClipsOutputs();
                 }}

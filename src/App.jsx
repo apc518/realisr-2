@@ -37,9 +37,7 @@ export const timeplotDefault = Object.freeze({
     falloffExponent: 0,
     finalSpeed: 1,
     subdivisions: 1,
-    points: [
-        {x: 0, y: 0}
-    ]
+    points: [] // will contain objects of the type { x: <number>, y: <number> }
 });
 
 export const timeplot = cloneDeep(timeplotDefault);
