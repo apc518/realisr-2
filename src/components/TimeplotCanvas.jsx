@@ -188,7 +188,6 @@ export default function TimeplotEditor({ lightGrayUI }){
                 backspaceHoldCountdown = p5.max(0, backspaceHoldCountdown - 1);
                 
                 // only delete the point if the backspace button has been held for enough time
-                // also only delete every other frame
                 if(backspaceHoldCountdown === 0){
                     tryDeletePoint();
                 }
@@ -274,6 +273,7 @@ export default function TimeplotEditor({ lightGrayUI }){
         p5.keyReleased = e => {
             if(e.key === "Backspace"){
                 p5.frameRate(restingFramerate);
+                backspaceHoldCountdown = backspaceHoldTime;
             }
         }
     }
