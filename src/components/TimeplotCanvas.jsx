@@ -25,8 +25,8 @@ export const fitTimeplotToCanvas = (scaleUp=false) => {
     // rescale all points so the farthest one out is just inside the border
     let ratio = (canvasWidth / 2 - 10) / maxDistance;
     for(let point of timeplot.points){
-        point.x = Math.round(point.x * ratio);
-        point.y = Math.round(point.y * ratio);
+        point.x *= ratio;
+        point.y *= ratio;
         
     }
 }
@@ -92,10 +92,17 @@ export const loadTimeplotObj = (newTimeplot, name) => {
 
 export let p5sketch;
 
+// these specifiy where the timeplot's own (0, 0) is on the canvas (by default, at (canvasWidth / 2, canvasHeight / 2))
+let centerX;
+let centerY;
+
+export const resetCanvasCenter = () => {
+    centerX = canvasWidth / 2;
+    centerY = canvasHeight / 2;
+}
+
 // matplotlib default colors, omage to Realisr 1
 const lineColors = ['#0099dc', '#fc4f30', '#e5ae38', '#6db04f', '#bbb', '#c12fac'];
-
-let canvas;
 
 export default function TimeplotEditor({ lightGrayUI }){
     const sketchBgColorDefault = lightGrayUI;
@@ -128,7 +135,7 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         const tryPlacePoint = (x, y) => {
             if (x < canvasWidth && x > 0 && y < canvasHeight && y > 0){
-                timeplot.points.push({ x: x - (canvasWidth / 2), y: - y + (canvasHeight / 2) });
+                timeplot.points.push({ x: x - centerX, y: - y + centerY });
                 resetClipsOutputs();
             }
         }
@@ -142,17 +149,21 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         const arrowheadSize = 8;
 
-        const drawingFramerate = 30;
+        const drawingFramerate = 60;
         const restingFramerate = 1;
         const backspaceHoldTime = drawingFramerate / 2; // approximately half a second
         let backspaceHoldCountdown = backspaceHoldTime;
 
+        let movingPerspective = false;
+
         p5.setup = () => {
-            canvas = p5.createCanvas(canvasWidth, canvasHeight);
+            let canvas = p5.createCanvas(canvasWidth, canvasHeight);
             canvas.drop(gotFile);
             canvas.dragOver(onDragOver);
             canvas.dragLeave(onDragLeave);
             p5sketch = p5;
+            centerX = canvasWidth / 2;
+            centerY = canvasHeight / 2;
         };
     
         p5.draw = () => {
@@ -161,6 +172,15 @@ export default function TimeplotEditor({ lightGrayUI }){
             if(p5.mouseIsPressed){
                 if(p5.mouseButton === p5.LEFT && (p5.mouseX !== p5.pmouseX || p5.mouseY !== p5.pmouseY)){
                     tryPlacePoint(p5.mouseX, p5.mouseY);
+                }
+                if(p5.mouseButton === p5.CENTER){
+                    if(movingPerspective){
+                        centerX += (p5.mouseX - p5.pmouseX);
+                        centerY += (p5.mouseY - p5.pmouseY);
+                    }
+                    else if(timeplot.points.length > 0){
+                        movingPerspective = true;
+                    }
                 }
             }
 
@@ -179,24 +199,28 @@ export default function TimeplotEditor({ lightGrayUI }){
             
             let colorCounter = 0;
 
+            // draw instruction message
+            if(timeplot.points.length < 1){
+                p5.push()
+                p5.translate(canvasWidth / 2, canvasHeight / 2); // this should always be in the actual center rather than centerX and centerY
+                p5.textAlign(p5.CENTER);
+                p5.textFont("Trebuchet MS");
+                p5.textSize(20);
+                p5.fill("#bbb");
+                p5.text("Start drawing or drag and drop a timeplot file!\nRight click to draw segments one at a time,\nor left click and hold to freehand.\nUse backspace to delete segments.", 0, -20);
+                p5.pop();
+                return;
+            }
+
             // draw timeplot
             p5.strokeWeight(2);
-            if(timeplot.points.length < 2){
+            p5.push();
+            p5.translate(centerX, centerY);
+            if(timeplot.points.length === 1){
                 p5.push();
-                p5.translate(canvasWidth / 2, canvasHeight / 2);
-                if(timeplot.points.length === 1){
-                    p5.fill(lineColors[0]);
-                    p5.noStroke();
-                    p5.ellipse(timeplot.points[0].x, -timeplot.points[0].y, 6);
-                }
-                else{
-                    p5.textAlign(p5.CENTER);
-                    p5.textFont("Trebuchet MS");
-                    p5.textSize(20);
-                    p5.fill("#bbb");
-                    p5.text("Start drawing or drag and drop a timeplot file!\nRight click to draw segments one at a time,\nor left click and hold to freehand.\nUse backspace to delete segments.", 0, -20);
-                }
-                
+                p5.fill(lineColors[0]);
+                p5.noStroke();
+                p5.ellipse(timeplot.points[0].x, -timeplot.points[0].y, 6);                
                 p5.pop();
             }
             for(let i = 1; i < timeplot.points.length; i++){
@@ -208,7 +232,6 @@ export default function TimeplotEditor({ lightGrayUI }){
                 p5.stroke(color);
                 let [prevX, prevY] = [timeplot.points[i-1].x, -timeplot.points[i-1].y];
                 let [x, y] = [timeplot.points[i].x, -timeplot.points[i].y];
-                p5.translate(canvasWidth / 2, canvasHeight / 2);
                 p5.line(prevX, prevY, x, y);
     
                 // arrowhead
@@ -226,15 +249,19 @@ export default function TimeplotEditor({ lightGrayUI }){
 
                 p5.pop();
             }
+            p5.pop();
         }
 
         p5.mousePressed = () => {
             p5.frameRate(drawingFramerate);
-            tryPlacePoint(p5.mouseX, p5.mouseY);
+            if(p5.mouseButton === p5.RIGHT){
+                tryPlacePoint(p5.mouseX, p5.mouseY);
+            }
         }
 
         p5.mouseReleased = () => {
             p5.frameRate(restingFramerate);
+            movingPerspective = false;
         }
     
         p5.keyPressed = e => {

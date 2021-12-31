@@ -8,7 +8,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
 
 import { timeplot, globalButtonsWidth } from "../App.jsx";
-import { fitTimeplotToCanvas, loadTimeplotObj, p5sketch } from "./TimeplotCanvas.jsx";
+import { fitTimeplotToCanvas, loadTimeplotObj, p5sketch, resetCanvasCenter } from "./TimeplotCanvas.jsx";
 import { clipsEx, resetClipsOutputs } from "./ClipList.jsx";
 
 let minSegmentsInRandomWalk = 1;
@@ -47,6 +47,7 @@ export default function GlobalButtons() {
                 onClick={() => {
                     timeplot.points.splice(0, timeplot.points.length);
                     resetClipsOutputs();
+                    resetCanvasCenter();
                     try{
                         p5sketch.draw();
                     }
