@@ -60,6 +60,8 @@ export class Clip {
         }
 
         this.isRealised = true;
+
+        this.generateDownload();
     }
 
     play(){

@@ -9,19 +9,14 @@ export let clipsEx = [];
 const linkColorAtRest = "#0ff";
 
 export const resetClipsOutputs = () => {
-    let changed = false;
     for (let c of clipsEx) {
         if(!(c.blob === null && c.outAudioBuffer === null && c.isRealised === false)){
             c.blob = null;
             c.outAudioBuffer = null;
             c.isRealised = false;
-
-            changed = true;
         }
     }
-    if(changed){
-        setClipsEx([...clipsEx]); // refresh clip list
-    }
+    setClipsEx([...clipsEx]); // refresh clip list
 }
 
 export default function ClipList({ clipsMessage }){
@@ -92,7 +87,7 @@ export default function ClipList({ clipsMessage }){
                                 initAudioCtx();
                             }
 
-                            if(clip.playingOut){
+                            if(clip.playingOut && clip.isRealised){
                                 clip.stopOut();
                                 setClipsEx([...clips]);
                                 return;
@@ -118,6 +113,7 @@ export default function ClipList({ clipsMessage }){
                                         showConfirmButton: false,
                                         timer: 100
                                     }).then(() => {
+                                        clip.stopOut();
                                         console.time("realising");
                                         clip.realise();
                                         console.timeEnd("realising");
@@ -126,6 +122,7 @@ export default function ClipList({ clipsMessage }){
                                     });
                                 }
                                 else{
+                                    clip.stopOut();
                                     clip.play();
                                     setClipsEx([...clips]);
                                 }
@@ -153,29 +150,25 @@ export default function ClipList({ clipsMessage }){
                     >
                         {clip.playingOriginal ? "Stop" : "Play"} Original
                     </button>
-                    <br/>
-                    {
-                        (clip.blob && clip.isRealised) ? 
-                            <a 
-                                href={clip.blob}
-                                download={(() => {
-                                    let pos = clip.name.lastIndexOf(".");
-                                    let no_ext = clip.name.slice(0, pos);
-                                    return no_ext + "_realised.wav";
-                                })()}
-                                style={{
-                                    color: linkColor
-                                }}
-                                onMouseDown={() => setLinkColor("#fff")}
-                                onMouseUp={() => setLinkColor("#0ff")}
-                            >Download</a>
-                        : <button
-                            onClick={() => { 
-                                clip.generateDownload();
-                                setClipsEx([...clips]);
+                    { (clip.blob && clip.isRealised) ?
+                        <>
+                        <br/>
+                        <a
+                            href={clip.blob}
+                            download={(() => {
+                                let pos = clip.name.lastIndexOf(".");
+                                let no_ext = clip.name.slice(0, pos);
+                                return no_ext + "_realised.wav";
+                            })()}
+                            style={{
+                                color: linkColor
                             }}
-                            disabled={!clip.isRealised}
-                        >Generate Download</button>
+                            onMouseDown={() => setLinkColor("#fff")}
+                            onMouseUp={() => setLinkColor("#0ff")}
+                        >Download</a>
+                        </>
+                        :
+                        <></>
                     }
                 </div>
             ))}
