@@ -82,17 +82,17 @@ export default function GlobalButtons() {
                     let downloadElem = document.createElement('a');
                     downloadElem.href = blob;
                     Swal.fire({
-                        title: "Name:",
+                        title: "Timeplot Name:",
                         input: "text",
                         showCancelButton: true
                     }).then(res => {
                         if(res.isConfirmed){
                             let name = res.value;
                             if(name === ""){
-                                name = "New Timeplot.json"
+                                name = "New.timeplot"
                             }
-                            else if (!name.endsWith(".json")){
-                                name = name + ".json";
+                            else if (!name.endsWith(".timeplot")){
+                                name = name + ".timeplot";
                             }
                             downloadElem.download = name;
                             downloadElem.click();

@@ -1,4 +1,5 @@
 import React from "react";
+import { Buffer } from 'buffer';
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import Swal from "sweetalert2";
 import { cloneDeep } from "lodash";
@@ -116,7 +117,13 @@ export default function TimeplotEditor({ lightGrayUI }){
                 loadTimeplotObj(newTimeplot, f.name);
             }
             else{
-                invalidTimeplotFile(f.name, "Not a json file");
+                try{
+                    const newTimeplot = JSON.parse(Buffer.from(f.data.slice(f.data.indexOf(",")+1), 'base64').toString());
+                    loadTimeplotObj(newTimeplot, f.name);
+                }
+                catch{
+                    invalidTimeplotFile(f.name, "Not a json file");
+                }
             }
             
             sketchBgColor = sketchBgColorDefault;
