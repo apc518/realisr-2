@@ -88,10 +88,13 @@ impl TimePlot {
     
     fn linear_interp(&self, idx: f32) -> f32 {
         let mut ceil_idx = idx.ceil() as usize;
-        let floor_idx = idx.floor() as usize;
+        let mut floor_idx = idx.floor() as usize;
         let portion = idx - (idx.floor());
         if ceil_idx >= self.in_audio_buffer.len() {
             ceil_idx = self.in_audio_buffer.len() - 1;
+        }
+        if floor_idx >= self.in_audio_buffer.len() {
+            floor_idx = self.in_audio_buffer.len() - 1;
         }
         let diff = self.in_audio_buffer[ceil_idx] - self.in_audio_buffer[floor_idx];
 
