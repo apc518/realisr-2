@@ -23,3 +23,11 @@ npm ci
 npm run build
 npm run dev
 ```
+
+## Where the Name "Realisr" Comes From
+
+The name "realisr" is a double entendre of sorts:
+1. Randomized Linked Segmented Rescale. As an acronym, RLSR, it kind of sounds like "realiser". This is what the original Realisr was, and while Realisr 2 also includes RLSR functionality, it is not limited to that. This acronym is why I use the British spelling (with an 's' rather than a 'z'), even though I am American.
+2. The theoretical backing of this project was projecting music from complex time into real time, so literally "making real" or "realizing".
+
+Then the "e" is dropped from "realiser" to line up with the naming convention of my previous music apps, Flippr and Spookr. A convention that arose just because I wanted the apps to be distinct from their namesake english verbs.
