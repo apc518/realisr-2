@@ -102,12 +102,13 @@ export default function App(){
 
             <footer style={{
                 marginTop: 'auto',
-                height: '3.5rem',
                 color: "#888",
-                lineHeight: '1.5rem'
+                lineHeight: '1.5rem',
+                paddingBottom: '0.5rem'
             }}>
-            <div>Copyright &copy; 2022 <a className="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
+            <div><a className="footerLink" target="_blank" rel="noreferrer" href="https://youtu.be/iTOonc3Lr2A" title="About Video">What the hell is this???</a></div>
             <div><a className="footerLink" target="_blank" rel="noreferrer" href="https://github.com/apc518/realisr-2" title="Realisr 2 Github">GitHub</a></div>
+            <div>Copyright &copy; 2022 <a className="footerLink" target="_blank" rel="noreferrer" href="https://chambercode.com/about/andy" title="ChamberCode Portfolio">Andy Chamberlain</a></div>
             </footer>
         </div>
     );
