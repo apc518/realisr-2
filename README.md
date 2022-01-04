@@ -1,13 +1,13 @@
 # Realisr 2 🕰️
 Ground-up reboot of Realisr as a client-side-only webapp with way more features!
 
-https://realisr2.netlify.app
+https://chambercode.com/music/realisr2 or https://realisr2.netlify.app
 
 ![image](https://user-images.githubusercontent.com/56745633/148028104-f420b3d0-0105-496b-baa8-c60e6b7bc646.png)
 
-[Realisr 1](https://github.com/apc518/realisr.git) was written in Python and was not well optimized.
+[Realisr 1](https://github.com/apc518/realisr) was written in Python and was not well optimized.
 
-[Realisr 2](https://realisr2.netlify.app) is written in JavaScript and Rust, taking advantage of WebAssembly for increased performance.
+[Realisr 2](https://chambercode.com/music/realisr2) is written in JavaScript and Rust, taking advantage of WebAssembly for increased performance.
 
 ## Development Setup
 
