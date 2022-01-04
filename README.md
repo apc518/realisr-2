@@ -3,7 +3,7 @@ Ground-up reboot of Realisr as a client-side-only webapp with way more features!
 
 https://realisr2.netlify.app
 
-![image](https://user-images.githubusercontent.com/56745633/147755892-50d33fd7-19fa-4268-a314-e39bfa3c347b.png)
+![image](https://user-images.githubusercontent.com/56745633/148028104-f420b3d0-0105-496b-baa8-c60e6b7bc646.png)
 
 [Realisr 1](https://github.com/apc518/realisr.git) was written in Python and was not well optimized.
 
