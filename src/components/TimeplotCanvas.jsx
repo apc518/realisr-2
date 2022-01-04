@@ -97,6 +97,8 @@ export let p5sketch;
 let centerX;
 let centerY;
 
+let showGridLines = false;
+
 export const resetCanvasCenter = () => {
     centerX = canvasWidth / 2;
     centerY = canvasHeight / 2;
@@ -158,6 +160,7 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         const drawingFramerate = 60;
         const restingFramerate = 1;
+
         const backspaceHoldTime = drawingFramerate / 2; // approximately half a second
         let backspaceHoldCountdown = backspaceHoldTime;
 
@@ -176,6 +179,22 @@ export default function TimeplotEditor({ lightGrayUI }){
         p5.draw = () => {
             p5.background(sketchBgColor);
 
+            // grid
+            if(showGridLines){
+                const gridLines = 10;
+                const gridColor = "#5a5a5a";
+                p5.push();
+                p5.noFill();
+                p5.stroke(gridColor);
+                for(let i = 0; i < gridLines; i++){
+                    // vertical lines
+                    p5.line(i * canvasWidth / gridLines, 0, i * canvasWidth / gridLines, canvasHeight);
+                    // horizontal lines
+                    p5.line(0, i * canvasHeight / gridLines, canvasWidth, i * canvasHeight / gridLines);
+                }
+                p5.pop();
+            }
+            
             if(p5.mouseIsPressed){
                 if(p5.mouseButton === p5.LEFT && (p5.mouseX !== p5.pmouseX || p5.mouseY !== p5.pmouseY)){
                     tryPlacePoint(p5.mouseX, p5.mouseY);
@@ -286,6 +305,13 @@ export default function TimeplotEditor({ lightGrayUI }){
     }
 
     return (
+        <>
         <ReactP5Wrapper sketch={sketch} />
+        <input id="gridCheckbox" type="checkbox" onClick={e => { 
+            showGridLines = e.target.checked;
+            p5sketch.draw();
+        }}/>
+        <label htmlFor="gridCheckbox">Show Grid</label>
+        </>
     )
 }
