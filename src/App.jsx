@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { cloneDeep } from "lodash";
 
-import { clipsEx, setClipsEx } from "./components/ClipList.jsx";
+import { convertSliderValueToAmplitude } from './components/MasterVolumeControl.jsx';
 
 import ClipList from "./components/ClipList.jsx";
 import AudioFileDrop from "./components/AudioFileDrop.jsx";
@@ -21,7 +21,8 @@ export const lightGrayUI = "#444";
 
 export let audioCtx;
 
-export const globalVolumeDefault = 0.5264; // this is 80% on the slider
+export const globalVolumeSliderDefault = 80; // out of 100
+export const globalVolumeDefault = convertSliderValueToAmplitude(globalVolumeSliderDefault);
 export let globalVolume = globalVolumeDefault;
 export let globalSpeed = 1;
 
