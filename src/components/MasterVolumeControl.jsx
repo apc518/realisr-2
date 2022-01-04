@@ -25,8 +25,6 @@ const doVolumeInput = e => {
         initAudioCtx();
     }
     
-    console.log("volume slider changed");
-    
     const val = convertSliderValueToAmplitude(e.target.value);
     setGlobalVolume(val);
     for(let clip of clipsEx){
@@ -44,7 +42,7 @@ export default function MasterVolumeControl(){
             elem.click();
         }}>
             Reset
-        </button> <br/>
+        </button><br/>
         <input
             id="globalVolumeSlider"
             type="range"

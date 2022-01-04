@@ -74,10 +74,13 @@ export default function App(){
                 flexDirection: 'column'
             }}
         >
-            <div id="globalSliders">
-                <MasterVolumeControl/>
-                <br/>
-                <PlaybackRateControl/>
+            <div id="globalSliders" style={{ display: 'flex' }}>
+                <div style={{ marginRight: '1.5rem' }}>
+                    <MasterVolumeControl/>
+                </div>
+                <div>
+                    <PlaybackRateControl/>
+                </div>
             </div>
 
             <div style={{
