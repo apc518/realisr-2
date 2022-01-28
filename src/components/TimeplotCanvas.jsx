@@ -98,6 +98,10 @@ let centerX;
 let centerY;
 
 let showGridLines = false;
+let circleMode = false;
+
+let selection = [0,0,0,0]; // x1, y1, x2, y2 defining a rectangular selection on the canvas
+let selecting = false;
 
 export const resetCanvasCenter = () => {
     centerX = canvasWidth / 2;
@@ -166,6 +170,8 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         let movingPerspective = false;
 
+        let preShapePoints = [];
+
         p5.setup = () => {
             let canvas = p5.createCanvas(canvasWidth, canvasHeight);
             canvas.drop(gotFile);
@@ -178,6 +184,13 @@ export default function TimeplotEditor({ lightGrayUI }){
     
         p5.draw = () => {
             p5.background(sketchBgColor);
+
+            if(circleMode){
+                p5.cursor(p5.CROSS);
+            }
+            else{
+                p5.cursor(p5.ARROW);
+            }
 
             // grid
             if(showGridLines){
@@ -196,9 +209,7 @@ export default function TimeplotEditor({ lightGrayUI }){
             }
             
             if(p5.mouseIsPressed){
-                if(p5.mouseButton === p5.LEFT && (p5.mouseX !== p5.pmouseX || p5.mouseY !== p5.pmouseY)){
-                    tryPlacePoint(p5.mouseX, p5.mouseY);
-                }
+                // normal drawing
                 if(p5.mouseButton === p5.CENTER){
                     if(movingPerspective){
                         centerX += (p5.mouseX - p5.pmouseX);
@@ -206,6 +217,48 @@ export default function TimeplotEditor({ lightGrayUI }){
                     }
                     else if(timeplot.points.length > 0){
                         movingPerspective = true;
+                    }
+                }
+                if(!selecting && !circleMode){
+                    if(p5.mouseButton === p5.LEFT && (p5.mouseX !== p5.pmouseX || p5.mouseY !== p5.pmouseY)){
+                        tryPlacePoint(p5.mouseX, p5.mouseY);
+                    }
+                }
+                // selecting (click+drag to make a rectangle)
+                else if ((selecting || circleMode) && !(p5.mouseButton === p5.CENTER)){
+                    // update selection
+                    selection[2] = p5.mouseX - selection[0];
+                    selection[3] = p5.mouseY - selection[1];
+
+                    // holding shift locks the selection to a square
+                    if(p5.keyIsDown(16) || circleMode){
+                        selection[2] = Math.sign(selection[2]) * Math.max(Math.abs(selection[2]), Math.abs(selection[3]));
+                        selection[3] = Math.sign(selection[3]) * Math.max(Math.abs(selection[2]), Math.abs(selection[3]));
+                    }    
+                    
+                    // draw selection
+                    p5.push();
+                    p5.stroke(200, 50, 50);
+                    p5.strokeWeight(2);
+                    p5.noFill();
+                    p5.rect(...selection);
+                    p5.pop();
+
+                    if(circleMode){
+                        const resolution = 200;
+
+                        timeplot.points = preShapePoints.slice();
+
+                        let deltaTheta = 2 * p5.PI / resolution;
+                        let radius = Math.abs(selection[2] / 2); // same as selection[3] / 2, since in circle mode selection is square
+                        let centerX = selection[0] + selection[2] / 2;
+                        let centerY = selection[1] + selection[3] / 2;
+                        for(let theta = 0; theta < 2 * p5.PI; theta += deltaTheta){
+                            timeplot.points.push({
+                                x: radius * p5.cos(theta) + (centerX - canvasWidth / 2),
+                                y: radius * p5.sin(theta) - (centerY - canvasHeight / 2)
+                            });
+                        }
                     }
                 }
             }
@@ -224,6 +277,7 @@ export default function TimeplotEditor({ lightGrayUI }){
             
             let colorCounter = 0;
 
+            // if plot is empty,
             // draw instruction message
             if(timeplot.points.length < 1){
                 p5.push()
@@ -278,15 +332,39 @@ export default function TimeplotEditor({ lightGrayUI }){
         }
 
         p5.mousePressed = () => {
+            if(p5.mouseX > canvasWidth || p5.mouseY > canvasHeight || p5.mouseX < 0 || p5.mouseY < 0){
+                return;
+            }
+
             p5.frameRate(drawingFramerate);
-            if(p5.mouseButton === p5.RIGHT){
-                tryPlacePoint(p5.mouseX, p5.mouseY);
+            
+            if(circleMode){
+                preShapePoints = timeplot.points.slice();
+            }
+
+            if(p5.keyIsDown(17)){
+                selecting = true;
+            }
+            else{
+                selecting = false;
+            }
+            
+            if(!selecting && !circleMode){
+                if(p5.mouseButton === p5.RIGHT){
+                    tryPlacePoint(p5.mouseX, p5.mouseY);
+                }
+            }
+            else{
+                selecting = true;
+                selection[0] = p5.mouseX;
+                selection[1] = p5.mouseY;
             }
         }
 
         p5.mouseReleased = () => {
             p5.frameRate(restingFramerate);
             movingPerspective = false;
+            p5.draw();
         }
     
         p5.keyPressed = e => {
@@ -294,12 +372,21 @@ export default function TimeplotEditor({ lightGrayUI }){
                 p5.frameRate(drawingFramerate);
                 tryDeletePoint();
             }
+            if(e.key === "Control"){
+                selecting = true;
+                p5.cursor(p5.CROSS);
+            }
         }
 
         p5.keyReleased = e => {
             if(e.key === "Backspace"){
                 p5.frameRate(restingFramerate);
                 backspaceHoldCountdown = backspaceHoldTime;
+            }
+            if(e.key === "Control"){
+                selecting = false;
+                p5.cursor(p5.ARROW);
+
             }
         }
     }
@@ -311,7 +398,13 @@ export default function TimeplotEditor({ lightGrayUI }){
             showGridLines = e.target.checked;
             p5sketch.draw();
         }}/>
-        <label htmlFor="gridCheckbox">Show Grid</label>
+        <label htmlFor="gridCheckbox">Grid</label>
+        <input id="makeCircle" type="checkbox" onClick={e => { 
+            circleMode = e.target.checked;
+            p5sketch.draw();
+        }}/>
+        <label htmlFor="makeCircle">Make Circles</label>
+        
         </>
     )
 }
