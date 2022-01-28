@@ -165,7 +165,7 @@ export default function ClipList({ clipsMessage }){
                             }}
                             onMouseDown={() => setLinkColor("#fff")}
                             onMouseUp={() => setLinkColor("#0ff")}
-                        >Download</a>
+                        >Save</a>
                         </>
                         :
                         <></>
