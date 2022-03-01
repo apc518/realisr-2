@@ -168,6 +168,8 @@ export default function TimeplotEditor({ lightGrayUI }){
         const backspaceHoldTime = drawingFramerate / 2; // approximately half a second
         let backspaceHoldCountdown = backspaceHoldTime;
 
+        let drawingInCanvas = false;
+
         let movingPerspective = false;
 
         let preShapePoints = [];
@@ -208,7 +210,7 @@ export default function TimeplotEditor({ lightGrayUI }){
                 p5.pop();
             }
             
-            if(p5.mouseIsPressed){
+            if(p5.mouseIsPressed && drawingInCanvas){
                 // normal drawing
                 if(p5.mouseButton === p5.CENTER){
                     if(movingPerspective){
@@ -331,10 +333,12 @@ export default function TimeplotEditor({ lightGrayUI }){
             p5.pop();
         }
 
-        p5.mousePressed = () => {
+        p5.mousePressed = e => {
             if(p5.mouseX > canvasWidth || p5.mouseY > canvasHeight || p5.mouseX < 0 || p5.mouseY < 0){
+                drawingInCanvas = false;
                 return;
             }
+            drawingInCanvas = true;
 
             p5.frameRate(drawingFramerate);
             
