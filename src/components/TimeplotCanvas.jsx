@@ -136,6 +136,11 @@ export default function TimeplotEditor({ lightGrayUI }){
             p5.draw();
         }
 
+        const onDrop = () => {
+            sketchBgColor = sketchBgColorDefault;
+            p5.draw();
+        }
+
         const onDragOver = () => {
             sketchBgColor = sketchBgColorOnDragover;
             p5.draw();
@@ -176,7 +181,8 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         p5.setup = () => {
             let canvas = p5.createCanvas(canvasWidth, canvasHeight);
-            canvas.drop(gotFile);
+            console.log(canvas);
+            canvas.drop(gotFile, onDrop);
             canvas.dragOver(onDragOver);
             canvas.dragLeave(onDragLeave);
             p5sketch = p5;
