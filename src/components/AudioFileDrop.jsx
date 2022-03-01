@@ -12,6 +12,8 @@ export default function AudioAudioFileDrop({ setClipsMessage }){
     const [bgColor, setBgColor] = useState(inactiveColor);
 
     const loadFiles = fileList => {
+        if (fileList.length < 1) return; // this could happen if the user drops something that isnt a file
+        
         setClipsMessage(clipsMessageLoading);
 
         if(!audioCtx){
@@ -77,6 +79,7 @@ export default function AudioAudioFileDrop({ setClipsMessage }){
                 border: 'none'
             }}
 
+            // on click, open up a file input prompt
             onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();

@@ -333,7 +333,8 @@ export default function TimeplotEditor({ lightGrayUI }){
             p5.pop();
         }
 
-        p5.mousePressed = e => {
+        p5.mousePressed = () => {
+            // if the mouse is clicked outside the canvas
             if(p5.mouseX > canvasWidth || p5.mouseY > canvasHeight || p5.mouseX < 0 || p5.mouseY < 0){
                 drawingInCanvas = false;
                 return;
