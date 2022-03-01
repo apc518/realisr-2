@@ -238,7 +238,7 @@ export default function TimeplotEditor({ lightGrayUI }){
                     selection[2] = p5.mouseX - selection[0];
                     selection[3] = p5.mouseY - selection[1];
 
-                    // holding shift locks the selection to a square
+                    // lock the selection to a square if holding shift or in circle mode
                     if(p5.keyIsDown(16) || circleMode){
                         selection[2] = Math.sign(selection[2]) * Math.max(Math.abs(selection[2]), Math.abs(selection[3]));
                         selection[3] = Math.sign(selection[3]) * Math.max(Math.abs(selection[2]), Math.abs(selection[3]));
@@ -253,7 +253,8 @@ export default function TimeplotEditor({ lightGrayUI }){
                     p5.pop();
 
                     if(circleMode){
-                        const resolution = 200;
+                        let circleBoundingBoxSize = Math.abs(selection[2]);
+                        const resolution = Math.min(200, Math.max(30, Math.floor(circleBoundingBoxSize / 2)));
 
                         timeplot.points = preShapePoints.slice();
 
