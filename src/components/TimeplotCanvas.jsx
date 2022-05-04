@@ -165,7 +165,7 @@ export default function TimeplotEditor({ lightGrayUI }){
             }
         }
 
-        const rotateTimePlot = (theta) => {
+        const rotateTimePlot = () => {
             for(let i = 0; i < timeplot.points.length; i++){
                 let {x, y} = timeplot.points[i];
                 
@@ -181,10 +181,8 @@ export default function TimeplotEditor({ lightGrayUI }){
                     theta_0 += Math.PI;
                 }
 
-                let theta_1 = theta_0 - theta;
+                let theta_1 = theta_0 - rotateStep;
                 let r = Math.sqrt(x*x + y*y);
-
-                // console.log(theta_0, theta_1, r);
 
                 timeplot.points[i].x = r * Math.cos(theta_1);
                 timeplot.points[i].y = r * Math.sin(theta_1);
@@ -200,7 +198,7 @@ export default function TimeplotEditor({ lightGrayUI }){
         const backspaceHoldTime = drawingFramerate / 2; // approximately half a second
         let backspaceHoldCountdown = backspaceHoldTime;
 
-        const rotateStep = Math.PI / 64;
+        let rotateStep = Math.PI / 64;
         const rotateHoldTime = backspaceHoldTime;
         let rotateHoldCountdown = rotateHoldTime;
 
@@ -437,11 +435,13 @@ export default function TimeplotEditor({ lightGrayUI }){
             // rotate with the arrow keys
             if(e.key === "ArrowLeft"){
                 p5.frameRate(drawingFramerate);
-                rotateTimePlot(-rotateStep);
+                if (rotateStep > 0) rotateStep *= -1;
+                rotateTimePlot();
             }
             if(e.key === "ArrowRight"){ // right
                 p5.frameRate(drawingFramerate);
-                rotateTimePlot(rotateStep);
+                if (rotateStep < 0) rotateStep *= -1;
+                rotateTimePlot();
             }
         }
 
@@ -454,7 +454,7 @@ export default function TimeplotEditor({ lightGrayUI }){
                 selecting = false;
                 p5.cursor(p5.ARROW);
             }
-            if(e.key === "ArrowLeft" || e.key === "ArrowRight"){
+            if((e.key === "ArrowLeft" && !p5.keyIsDown(39)) || (e.key === "ArrowRight" && !p5.keyIsDown(37))){
                 p5.frameRate(restingFramerate);
                 rotateHoldCountdown = rotateHoldTime;
             }
