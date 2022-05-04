@@ -165,6 +165,33 @@ export default function TimeplotEditor({ lightGrayUI }){
             }
         }
 
+        const rotateTimePlot = (theta) => {
+            for(let i = 0; i < timeplot.points.length; i++){
+                let {x, y} = timeplot.points[i];
+                
+                let theta_0;
+                if (x === 0){
+                    theta_0 = Math.sign(y) * Math.PI / 2;
+                }
+                else{
+                    theta_0 = Math.atan(y / x);
+                }
+
+                if (x < 0){
+                    theta_0 += Math.PI;
+                }
+
+                let theta_1 = theta_0 - theta;
+                let r = Math.sqrt(x*x + y*y);
+
+                // console.log(theta_0, theta_1, r);
+
+                timeplot.points[i].x = r * Math.cos(theta_1);
+                timeplot.points[i].y = r * Math.sin(theta_1);
+            }
+            resetClipsOutputs();
+        }
+
         const arrowheadSize = 8;
 
         const drawingFramerate = 60;
@@ -172,6 +199,10 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         const backspaceHoldTime = drawingFramerate / 2; // approximately half a second
         let backspaceHoldCountdown = backspaceHoldTime;
+
+        const rotateStep = Math.PI / 64;
+        const rotateHoldTime = backspaceHoldTime;
+        let rotateHoldCountdown = rotateHoldTime;
 
         let drawingInCanvas = false;
 
@@ -181,7 +212,6 @@ export default function TimeplotEditor({ lightGrayUI }){
 
         p5.setup = () => {
             let canvas = p5.createCanvas(canvasWidth, canvasHeight);
-            console.log(canvas);
             canvas.drop(gotFile, onDrop);
             canvas.dragOver(onDragOver);
             canvas.dragLeave(onDragLeave);
@@ -272,6 +302,7 @@ export default function TimeplotEditor({ lightGrayUI }){
                 }
             }
 
+            // handle holding backspace
             if(p5.keyIsDown(8)){
                 backspaceHoldCountdown = p5.max(0, backspaceHoldCountdown - 1);
                 
@@ -282,6 +313,19 @@ export default function TimeplotEditor({ lightGrayUI }){
             }
             else{
                 backspaceHoldCountdown = backspaceHoldTime;
+            }
+
+            // handle holding rotate keys (left and right arrows)
+            if(p5.keyIsDown(37) || p5.keyIsDown(39)){
+                rotateHoldCountdown = p5.max(0, rotateHoldCountdown - 1);
+
+                if(rotateHoldCountdown === 0){
+                    let rotateAmount = p5.keyIsDown(39) ? rotateStep : -rotateStep;
+                    rotateTimePlot(rotateAmount);
+                }
+            }
+            else{
+                rotateHoldCountdown = rotateHoldTime;
             }
             
             let colorCounter = 0;
@@ -354,6 +398,7 @@ export default function TimeplotEditor({ lightGrayUI }){
                 preShapePoints = timeplot.points.slice();
             }
 
+            // hold ctrl to select an area
             if(p5.keyIsDown(17)){
                 selecting = true;
             }
@@ -372,13 +417,13 @@ export default function TimeplotEditor({ lightGrayUI }){
                 selection[1] = p5.mouseY;
             }
         }
-
+        
         p5.mouseReleased = () => {
             p5.frameRate(restingFramerate);
             movingPerspective = false;
             p5.draw();
         }
-    
+        
         p5.keyPressed = e => {
             if(e.key === "Backspace"){
                 p5.frameRate(drawingFramerate);
@@ -387,6 +432,16 @@ export default function TimeplotEditor({ lightGrayUI }){
             if(e.key === "Control"){
                 selecting = true;
                 p5.cursor(p5.CROSS);
+            }
+
+            // rotate with the arrow keys
+            if(e.key === "ArrowLeft"){
+                p5.frameRate(drawingFramerate);
+                rotateTimePlot(-rotateStep);
+            }
+            if(e.key === "ArrowRight"){ // right
+                p5.frameRate(drawingFramerate);
+                rotateTimePlot(rotateStep);
             }
         }
 
@@ -398,7 +453,10 @@ export default function TimeplotEditor({ lightGrayUI }){
             if(e.key === "Control"){
                 selecting = false;
                 p5.cursor(p5.ARROW);
-
+            }
+            if(e.key === "ArrowLeft" || e.key === "ArrowRight"){
+                p5.frameRate(restingFramerate);
+                rotateHoldCountdown = rotateHoldTime;
             }
         }
     }
